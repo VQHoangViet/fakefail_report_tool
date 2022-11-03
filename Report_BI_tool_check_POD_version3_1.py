@@ -268,7 +268,7 @@ def mapping_phase(x, url):
   agg = pd.read_csv(url)[['dest_hub_date', 'dest_hub_id', 'dest_hub_name', 'volume_of_ontime_KPI' ]]
   agg.rename(columns={"volume_of_ontime_KPI": 'Total orders reach LM hub' }, inplace=True)
 
-  agg_driver = x.merge(agg, how='left', left_on=['attempt_date','hub_id'], right_on=['dest_hub_date','dest_hub_id'],suffixes=('', '_y'))
+  agg_driver = x.merge(agg, how='left', left_on=['first_attempt_date','hub_id'], right_on=['dest_hub_date','dest_hub_id'],suffixes=('', '_y'))
 
   # agg_driver['Total orders reach LM hub'] = agg_driver.fillna(0)['Total orders reach LM hub'] + agg_driver.fillna(0)['Total orders reach LM hub_y']
   agg_driver.drop(columns=['dest_hub_date',	'dest_hub_id',	'dest_hub_name'], inplace=True)
@@ -282,14 +282,14 @@ def compute_phase(x):
   raw_data = x.copy()
   raw_data['BI_tracking_id'] = raw_data['BI_tracking_id'].astype(str)
   raw_data['BI_tracking_id'] = raw_data['BI_tracking_id'].str[1:-1]
-  max_total_order = raw_data.groupby(['hub_id', 'attempt_date'])[['Total orders reach LM hub']].transform(lambda x: x.max())
+  max_total_order = raw_data.groupby(['hub_id', 'first_attempt_date'])[['Total orders reach LM hub']].transform(lambda x: x.max())
   raw_data['FF_index'] = raw_data['BI_FakeFail_order_count']/max_total_order['Total orders reach LM hub']
   raw_data.describe().transpose()
   return pd.DataFrame(raw_data)
 
 # Final: exporting
 def export_final_driver_file(final):
-  final = final.sort_values('attempt_date')
+  final = final.sort_values('first_attempt_date')
   # raw_data.to_csv('/content/sample_data/final_driver_data.csv')
   final.to_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/fianl_data_monthly/final_driver_data_'+ str(dt.datetime.now().month) + '_' + str((dt.datetime.now().date().year)) +'.csv', index = False)
   # dashboard final data
