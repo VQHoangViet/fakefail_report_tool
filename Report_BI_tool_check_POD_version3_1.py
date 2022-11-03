@@ -214,7 +214,7 @@ def final_dispute(x):
 
 def spliting_file(x):
   for i in x['attempt_date'].unique():
-    x[x['attempt_date'] == i].to_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/Report BI Tool/Pre_processed data/'+str(i)+'_.csv', index=False)
+    x[x['attempt_date'] == i].to_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/Report BI Tool/Pre_processed data/'+str(i)+'.csv', index=False)
     print("Done file: " + str(i))
   print('DONE SLITING')
 
