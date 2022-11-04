@@ -291,7 +291,7 @@ def compute_phase(x):
 def export_final_driver_file(final):
   final = final.sort_values('first_attempt_date')
   # raw_data.to_csv('/content/sample_data/final_driver_data.csv')
-  final.to_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/fianl_data_monthly/final_driver_data_'+ str(dt.datetime.now().month) + '_' + str((dt.datetime.now().date().year)) +'.csv', index = False)
+  final.to_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/final_data_monthly/final_driver_data_'+ str(dt.datetime.now().month) + '_' + str((dt.datetime.now().date().year)) +'.csv', index = False)
   # dashboard final data
   try:
     final.drop(columns=['BI_tracking_id']).to_csv('/content/DB_final_driver_data_'+ str(dt.datetime.now().month) + '_' + str((dt.datetime.now().date().year)) +'.csv', index = False)
