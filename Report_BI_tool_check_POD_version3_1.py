@@ -209,8 +209,8 @@ def final_dispute(x):
 
   return pd.DataFrame(x)
 
-def spliting_file(x):
-  for i in x['attempt_date'].unique():
+def spliting_file(x, split_from, split_to):
+  for i in x.loc[(x['attempt_date'] >= pd.Timestamp(split_from)) & (x['attempt_date'] >= pd.Timestamp(split_to)), 'attempt_date'].unique():
     x[x['attempt_date'] == i].to_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/Report BI Tool/Pre_processed data/'+str(i)+'.csv', index=False)
     print("Done file: " + str(i))
   print('DONE SLITING')
@@ -304,7 +304,7 @@ def export_final_driver_file(final):
 
 
 ### ___________________________________________________ Main ____________________________________________________________  
-def read_pipeline(url_agg, str_time_from_, str_time_to_):
+def read_pipeline(url_agg, str_time_from_, str_time_to_, split_from_, split_to_):
   clear_output()
   # reading and preprecessing
   print('Phase 1: Reading Data and preprocessing' + '-'*100)
@@ -313,7 +313,7 @@ def read_pipeline(url_agg, str_time_from_, str_time_to_):
   clear_output()
   print('Phase 2: Preprocessing, Disputing, and Groupby Driver counting' + '-'*100)
   df = final_dispute(df)
-  spliting_file(df)
+  spliting_file(df, split_from=split_from_, split_to=split_to_)
         # print
   print(df['attempt_date'].unique())
   print("Number of Unique Driver_name: ", df['driver_name'].nunique())
