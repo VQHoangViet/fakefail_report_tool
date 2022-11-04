@@ -155,9 +155,7 @@ def final_dispute(x):
   disputing =  disputing.dropna(how='all', axis=1).dropna(how='all', axis=0).drop_duplicates(subset=['waypoint_id', 'order_id'])
   accepted_waypoint = disputing[disputing['Status'].isin(['Corrected', 'Product xin loại trừ', 'no'])]
   
-  x['disputing'] = 0
   x['corrected_dispute'] = 0
-  x.loc[x['waypoint_id'].isin(disputing['waypoint_id']), 'disputing'] = 1
   x.loc[x['waypoint_id'].isin(accepted_waypoint['waypoint_id']), 'corrected_dispute'] = 1
 
   ### Mass bug
@@ -181,8 +179,6 @@ def final_dispute(x):
   x.loc[ (x['result'] == 'fake_fail') & ((x['affected_by_mass_bug'] == 0) & (x['corrected_dispute'] == 0))   , 'final_result'] = 1
 
   ## Nocode here
-
-
   print('Done Dispute!')
 
   # url = [
@@ -228,18 +224,24 @@ def bi_agg(x):
         'Thời gian gọi sớm hơn hoặc bằng thời gian xử lý thất bại': x[x['Thời gian gọi sớm hơn hoặc bằng thời gian xử lý thất bại']==1]['waypoint_id'].count(),
         'Thời gian đổ chuông >10s trong trường hợp khách không nghe máy': x[x['Thời gian đổ chuông >10s trong trường hợp khách không nghe máy']==1]['waypoint_id'].count(),
         'no_call_log_aloninja': x[x['no_call_log_aloninja']==1]['waypoint_id'].count(),
-        # 'no_call_log_aloninja': x[x['fail_pod_reason']=='no_call_log_aloninja']['waypoint_id'].count(),
         'No Record': x[x['No Record']==1]['waypoint_id'].count(),
-        'BI_tracking_id': set(list(x[(x['result']=='fake_fail') & (x['affected_by_mass_bug']!=1) & (x['corrected_dispute']!=1)]['tracking_id'].unique())),
-        'total_attempt': x['waypoint_id'].count(),
-        'total_orders': x['order_id'].nunique(),
-        # 'BI_FakeFail': x[x['result']=='fake_fail']['tracking_id'].nunique(), # OPEX dont compute by Waypoint 19/10/2022
-        'MASS_BUG_PRODUCTION': x[(x['affected_by_mass_bug']==1) & (x['result']=='fake_fail')]['order_id'].nunique(),
-        'disputing_orders':  x[(x['disputing']==1) &  (x['result']=='fake_fail')]['order_id'].nunique(),
-        'correted_by_disputing_orders':  x[(x['corrected_dispute']==1) & (x['result']=='fake_fail')]['order_id'].nunique(),
-        'BI_FakeFail_order_count': len(set(x[x['result']=='fake_fail']['order_id'])),
 
-        'real_FF_orders': len(set(x[(x['final_result']==1)]['order_id']))
+        ## waypoint
+        'total_attempt': x['waypoint_id'].count(),
+        'total_fake_fail_attempt': x.loc[x['result'] == 'fake_fail','waypoint_id'].count(),
+        'attempt_fake_fail_list': set(x[x['result']=='fake_fail']['waypoint_id']),
+        'correted_by_disputing_attempt':  x[(x['corrected_dispute']==0) & (x['result']=='fake_fail')]['waypoint_id'].nunique(),
+        'total_attempt_affected_by_mass_bug': x[(x['affected_by_mass_bug']==1) & (x['result']=='fake_fail')]['waypoint_id'].nunique(),
+        'final_disputation_attempt':  x[(x['corrected_dispute']==0) & (x['result']=='fake_fail')]['waypoint_id'].nunique(),
+
+
+        ## tracking id
+        'total_orders': x['order_id'].nunique(),
+        'total_fake_fail_orders': x[x['result']=='fake_fail']['order_id'].nunique(),
+        'correted_by_disputing_orders':  x[(x['corrected_dispute']==1) & (x['result']=='fake_fail')]['order_id'].nunique(),
+        'total_orders_affected_by_mass_bug': x[(x['affected_by_mass_bug']==1) & (x['result']=='fake_fail')]['order_id'].nunique(),
+        'real_FF_orders': x[(x['final_result']==1)]['order_id'].nunique(),
+        'Final_Fake_fail_tracking_id_list': x[(x['final_result']==1)]['tracking_id'].unique()
         }
     return pd.Series(names)
 
