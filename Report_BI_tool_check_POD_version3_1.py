@@ -185,30 +185,29 @@ def final_dispute(x):
 
   print('Done Dispute!')
 
+  # url = [
+  #   'https://docs.google.com/spreadsheets/d/1KX1TceinNWG4_CCuN89VqXsLYnOquN-FnLIg_i1N-A8/edit#gid=0',
+  # ]
 
-  url = [
-    'https://docs.google.com/spreadsheets/d/1KX1TceinNWG4_CCuN89VqXsLYnOquN-FnLIg_i1N-A8/edit#gid=0',
-  ]
-
-  disputing_after_final = pd.DataFrame()
-  for i in url:
-    # holding temp data
-    print(i)
-    creds, _ = default()
-    gc = gspread.authorize(creds)
-    temp = gc.open_by_url(i).worksheet("Detail")
-    # Convert to a DataFrame and render.
-    disputing_after_final = pd.concat([disputing_after_final, get_as_dataframe(temp, evaluate_formulas=True)[['tracking_id','waypoint_id', 'Status']]])
+  # disputing_after_final = pd.DataFrame()
+  # for i in url:
+  #   # holding temp data
+  #   print(i)
+  #   creds, _ = default()
+  #   gc = gspread.authorize(creds)
+  #   temp = gc.open_by_url(i).worksheet("Detail")
+  #   # Convert to a DataFrame and render.
+  #   disputing_after_final = pd.concat([disputing_after_final, get_as_dataframe(temp, evaluate_formulas=True)[['tracking_id','waypoint_id', 'Status']]])
 
 
-  disputing_after_final =  disputing_after_final.dropna(how='all', axis=1).dropna(how='all', axis=0).drop_duplicates(subset=['waypoint_id', 'tracking_id'])
-  corrected_dispute_after_final_waypoint = disputing_after_final[disputing_after_final['Status'].isin(['no'])]
+  # disputing_after_final =  disputing_after_final.dropna(how='all', axis=1).dropna(how='all', axis=0).drop_duplicates(subset=['waypoint_id', 'tracking_id'])
+  # corrected_dispute_after_final_waypoint = disputing_after_final[disputing_after_final['Status'].isin(['no'])]
   
-  x['corrected_dispute_after_final'] = 0
-  x.loc[x['waypoint_id'].isin(corrected_dispute_after_final_waypoint['waypoint_id']), 'corrected_dispute_after_final'] = 1
-  x.loc[(x.attempt_datetime >= pd.Timestamp(2022, 10, 1)) & (x.attempt_datetime <= pd.Timestamp(2022, 10, 15))].to_csv('/content/raw1_15_thang10.csv', index=False)
-  x.loc[(x.attempt_datetime >= pd.Timestamp(2022, 10, 16)) & (x.attempt_datetime <= pd.Timestamp(2022, 10, 25))].to_csv('/content/raw16_25_thang10.csv', index=False)
-  print('Done Dispute combine!')
+  # x['corrected_dispute_after_final'] = 0
+  # x.loc[x['waypoint_id'].isin(corrected_dispute_after_final_waypoint['waypoint_id']), 'corrected_dispute_after_final'] = 1
+  # x.loc[(x.attempt_datetime >= pd.Timestamp(2022, 10, 1)) & (x.attempt_datetime <= pd.Timestamp(2022, 10, 15))].to_csv('/content/raw1_15_thang10.csv', index=False)
+  # x.loc[(x.attempt_datetime >= pd.Timestamp(2022, 10, 16)) & (x.attempt_datetime <= pd.Timestamp(2022, 10, 25))].to_csv('/content/raw16_25_thang10.csv', index=False)
+  # print('Done Dispute combine!')
 
   return pd.DataFrame(x)
 
