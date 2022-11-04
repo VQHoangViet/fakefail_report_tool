@@ -87,7 +87,7 @@ def driver_finder(x):
 def pre_processing(x):
     # save version data:
     try:
-      x.drop(columns=['Unnamed: 0'], inplace=True)
+      x.drop(columns=['Unnamed: 0', 'mass_down_server', 'disputing'], inplace=True)
     except:
       pass
     x.attempt_datetime = pd.to_datetime(x.attempt_datetime)
@@ -126,6 +126,8 @@ def pre_processing(x):
 
     # find driver type
     x['driver_type'] =  x.driver_name.apply(driver_finder)
+    x =  x.dropna(how='all', axis=1).dropna(how='all', axis=0)
+
     return pd.DataFrame(x)
 
 def get_disputetime():
