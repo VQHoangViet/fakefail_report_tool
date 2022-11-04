@@ -56,7 +56,7 @@ def reading_last_7_day():
     bi_data_raw = pd.concat([bi_data_raw, get_as_dataframe(temp)])
   return bi_data_raw.dropna(how='all', axis=1).dropna(how='all', axis=0)
 
-def read_folder_pod_resultQA_in_month():
+def read_folder_pod_resultQA_in_month(year_, month_, day_):
   # Get data file names
   mypath = '/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/Report BI Tool/Pre_processed data/'
   source_df = pd.DataFrame({
@@ -64,7 +64,7 @@ def read_folder_pod_resultQA_in_month():
     'date' : pd.to_datetime(pd.Series([item.replace(".csv", "") for item in [f for f in listdir(mypath) if (isfile(join(mypath, f)) & (os.path.splitext(os.path.basename(f))[1] == '.csv'))]]))
   })
   print(source_df['date'])
-  needed_df = source_df.loc[source_df.date >= pd.Timestamp(dt.datetime.now().year, (dt.datetime.now().date() - relativedelta(months=2)).month, 26)] # select continually update date range
+  needed_df = source_df.loc[source_df.date >= pd.Timestamp(year_, month_, day_)] # select continually update date range
 
   # get data frame
   dfs = []
@@ -300,25 +300,12 @@ def export_final_driver_file(final):
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-def read_pipeline(url_agg):
+### ___________________________________________________ Main ____________________________________________________________  
+def read_pipeline(url_agg, year__, month__, day__):
   clear_output()
   # reading and preprecessing
   print('Phase 1: Reading Data and preprocessing' + '-'*100)
-  df = pre_processing(pd.concat([read_folder_pod_resultQA_in_month().drop(columns=['final_result', 'disputing', 'corrected_dispute']), reading_last_7_day()], ignore_index=False))
+  df = pre_processing(pd.concat([read_folder_pod_resultQA_in_month(year_ = year__, month_= month__, day_ = day__).drop(columns=['final_result', 'disputing', 'corrected_dispute']), reading_last_7_day()], ignore_index=False))
   # dispute
   clear_output()
   print('Phase 2: Preprocessing, Disputing, and Groupby Driver counting' + '-'*100)
