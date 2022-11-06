@@ -309,16 +309,16 @@ def export_final_driver_file(final):
 
 
 ### ___________________________________________________ Main ____________________________________________________________  
-def read_pipeline(read_sevdays:bool, url_agg:str, str_time_from_:str, str_time_to_:str, split_from_:str, split_to_:str):
+def read_pipeline(url_agg:str, str_time_from_:str, str_time_to_:str, split_from_:str, split_to_:str):
   # reading and preprecessing
   print('Phase 1: Reading Data and preprocessing' + '-'*100)
-  if read_sevdays==True:
-    sev = reading_last_7_day()
-  else:
-    sev = pd.DataFrame()
-  clear_output()
-  big_frame = pd.concat([read_folder_pod_resultQA_in_month(str_time_from_, str_time_to_).drop(columns=['final_result', 'corrected_dispute']), sev], ignore_index=False)
-  df = pre_processing(big_frame.loc[(pd.to_datetime(big_frame) >= pd.Timestamp(str_time_from_)) & (pd.to_datetime(big_frame) <= pd.Timestamp(str_time_to_))])
+  # if read_sevdays==True:
+  #   sev = reading_last_7_day()
+  # else:
+  #   sev = pd.DataFrame()
+  # clear_output()
+  big_frame = pd.concat([read_folder_pod_resultQA_in_month(str_time_from_, str_time_to_).drop(columns=['final_result', 'corrected_dispute']), reading_last_7_day()], ignore_index=False)
+  df = pre_processing(big_frame.loc[(pd.to_datetime(big_frame['attempt_date']) >= pd.Timestamp(str_time_from_)) & (pd.to_datetime(big_frame['attempt_date']) <= pd.Timestamp(str_time_to_))])
   # dispute
   clear_output()
   print('Phase 2: Preprocessing, Disputing, and Groupby Driver counting' + '-'*100)
