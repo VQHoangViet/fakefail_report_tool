@@ -312,7 +312,7 @@ def export_final_driver_file(final):
 def read_pipeline(read_sevdays:bool, url_agg:str, str_time_from_:str, str_time_to_:str, split_from_:str, split_to_:str):
   # reading and preprecessing
   print('Phase 1: Reading Data and preprocessing' + '-'*100)
-  if read_sevdays:
+  if read_sevdays==True:
     sev = reading_last_7_day()
   else:
     sev = pd.DataFrame()
