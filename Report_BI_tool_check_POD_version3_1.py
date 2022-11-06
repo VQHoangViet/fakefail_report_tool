@@ -251,26 +251,12 @@ def bi_agg(x):
     return pd.Series(names)
 
 # Phase 4: get vol_of_ontime_KPI
-def get_hub_info():
-    # hub info
-
-  auth.authenticate_user()
-
-  creds, _ = default()
-
-  gc = gspread.authorize(creds)
-  hub_info_worksheet = gc.open_by_url('https://docs.google.com/spreadsheets/d/19X4i0LxQPfP7dhp1hFVRBD_b8PQzKvqV4hRA01iThT4/edit?usp=sharing').worksheet("hub_info")
-
-  # get_all_values gives a list of rows.
-
-  hub_info = get_as_dataframe(hub_info_worksheet).dropna(axis=1, how='all').dropna(axis=0, how='all')
-  return hub_info
 
 # Phase 5: mapping infor
 def mapping_phase(x, url):
   x = x.groupby(['driver_name', 'driver_type','first_attempt_date', 'hub_id',  'hub_name',	'region']).apply(bi_agg).reset_index() ###
   x.to_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/Report BI Tool/driver_groupby_attempt_date.csv', index=False)
-  hub_info = get_hub_info()
+  hub_info = pd.read_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/Dataset/Hubs enriched - hub_info.csv')
   agg = pd.read_csv(url)[['dest_hub_date', 'dest_hub_id', 'dest_hub_name', 'volume_of_ontime_KPI' ]]
   agg.rename(columns={"volume_of_ontime_KPI": 'Total orders reach LM hub' }, inplace=True)
 
