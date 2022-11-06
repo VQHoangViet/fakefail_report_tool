@@ -92,12 +92,14 @@ def pre_processing(x):
       x.drop(columns=['Unnamed: 0', 'mass_down_server', 'disputing'], inplace=True)
     except:
       pass
+    print('#1')
     x.attempt_datetime = pd.to_datetime(x.attempt_datetime)
     x = get_first_attempt_date(x) ## 11/03/2022: get first attempt to mapping
     # notice: no_call_log_aloninja = fakefail (update: 30/09/2022)
     x['no_call_log_aloninja'] = 0
     x.loc[x['count_call_log'].isna(), 'no_call_log_aloninja'] = 1
 
+    print('#2')
 
     # CONVERT data_type
     x['attempt_datetime'] = pd.to_datetime(x['attempt_datetime'])
@@ -115,20 +117,27 @@ def pre_processing(x):
         'Thời gian gọi sớm hơn hoặc bằng thời gian xử lý thất bại',
         'Thời gian đổ chuông >10s trong trường hợp khách không nghe máy' ,
         'No Record', 'no_call_log_aloninja']].replace('-', 0).astype('float64')
-    # dropna columns  
+   
+    # dropna columns 
+    print('#3')
+ 
     x = x.dropna(how='all', axis=1).dropna(how='all', axis=0)   
+    print('#4')
 
     # fill na to zero
     x['count_call_log'] = x['count_call_log'].fillna(0)
+    print('#5')
 
     # drop dupli waypoint_id AND tracking_id
     # bug: drop được duplicate nhưng bị mất FF attempt nếu nằm ở đầu (fixed)
     x = x.sort_values(['attempt_datetime'])
     x = x.drop_duplicates(subset=['order_id', 'waypoint_id'], keep='last')
+    print('#6')
 
     # find driver type
     x['driver_type'] =  x.driver_name.apply(driver_finder)
     x =  x.dropna(how='all', axis=1).dropna(how='all', axis=0)
+    print('#end')
 
     return pd.DataFrame(x)
 
