@@ -301,7 +301,7 @@ def read_pipeline(url_agg:str, str_time_from_:str, str_time_to_:str, split_from_
   # else:
   #   sev = pd.DataFrame()
   # clear_output()
-  big_frame = pd.concat([read_folder_pod_resultQA_in_month(str_time_from_, str_time_to_).drop(columns=['final_result', 'corrected_dispute']), reading_last_7_day()], ignore_index=False)
+  big_frame = read_folder_pod_resultQA_in_month(str_time_from_, str_time_to_).drop(columns=['final_result', 'corrected_dispute'])
   df = pre_processing(big_frame.loc[(pd.to_datetime(big_frame['attempt_date']) >= pd.Timestamp(str_time_from_)) & (pd.to_datetime(big_frame['attempt_date']) <= pd.Timestamp(str_time_to_))])
   # dispute
   clear_output()
