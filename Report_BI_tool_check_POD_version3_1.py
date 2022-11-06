@@ -14,7 +14,6 @@ from os import listdir
 from os.path import isfile, join
 import os
 from dateutil.relativedelta import relativedelta
-print('hello Ninja !!!' + str(pd.Timestamp.now()))
 
 drive.mount('/content/drive', force_remount=True)
 pd.set_option('display.max_columns', None)
@@ -307,6 +306,8 @@ def export_final_driver_file(final):
 
 ### ___________________________________________________ Main ____________________________________________________________  
 def read_pipeline(url_agg:str, str_time_from_:str, str_time_to_:str, split_from_:str, split_to_:str):
+  print('hello Ninja !!!' + str(pd.Timestamp.now()))
+
   # reading and preprecessing
   print('Phase 1: Reading Data and preprocessing' + '-'*100)
   # if read_sevdays==True:
