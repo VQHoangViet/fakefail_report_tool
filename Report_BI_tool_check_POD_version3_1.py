@@ -287,10 +287,11 @@ def mapping_phase(x, url):
 def compute_phase(x):
   import math
   raw_data = x.copy()
-  raw_data['BI_tracking_id'] = raw_data['BI_tracking_id'].astype(str)
-  raw_data['BI_tracking_id'] = raw_data['BI_tracking_id'].str[1:-1]
+
   max_total_order = raw_data.groupby(['hub_id', 'first_attempt_date'])[['Total orders reach LM hub']].transform(lambda x: x.max())
-  raw_data['FF_index'] = raw_data['BI_FakeFail_order_count']/max_total_order['Total orders reach LM hub']
+  raw_data['original_FF_index'] = raw_data['total_fake_fail_orders']/max_total_order['Total orders reach LM hub']
+  raw_data['actual_fakefail_index'] = raw_data['real_FF_orders']/max_total_order['Total orders reach LM hub']
+
   raw_data.describe().transpose()
   return pd.DataFrame(raw_data)
 
