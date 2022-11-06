@@ -287,13 +287,10 @@ def mapping_phase(x, url):
 def compute_phase(x):
   import math
   raw_data = x.copy()
-
   max_total_order = raw_data.groupby(['hub_id', 'first_attempt_date'])[['Total orders reach LM hub']].transform(lambda x: x.max())
-  raw_data['original_FF_index'] = raw_data['total_fake_fail_orders']/max_total_order['Total orders reach LM hub']
-  raw_data['actual_fakefail_index'] = raw_data['real_FF_orders']/max_total_order['Total orders reach LM hub']
-
-  raw_data.describe().transpose()
-  return pd.DataFrame(raw_data)
+  raw_data['original_FF_index'] = (raw_data['total_fake_fail_orders']/max_total_order['Total orders reach LM hub']).fillna(0)
+  raw_data['actual_fakefail_index'] = raw_data['real_FF_orders']/max_total_order['Total orders reach LM hub'].fillna(0)
+  return raw_data
 
 # Final: exporting
 def export_final_driver_file(final):
@@ -302,9 +299,9 @@ def export_final_driver_file(final):
   final.to_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/final_data_monthly/final_driver_data_'+ str(dt.datetime.now().month) + '_' + str((dt.datetime.now().date().year)) +'.csv', index = False)
   # dashboard final data
   try:
-    final.drop(columns=['attempt_fake_fail_list', 'Final_Fake_fail_tracking_id_list']).to_csv('/content/DB_final_driver_data_'+ str(dt.datetime.now().month) + '_' + str((dt.datetime.now().date().year)) +'.csv', index = False)
+    final.drop(columns=['attempt_fake_fail_list', 'Final_Fake_fail_tracking_id_list']).to_csv('/content/DB_final_driver_data_'+ str(pd.to_datetime(final['first_attempt_date']).dt.month.max()) + '_' + str((pd.to_datetime(final['first_attempt_date']).dt.year.max())) +'.csv', index = False)
   except:
-    final.to_csv('/content/DB_final_driver_data_'+ str(dt.datetime.now().month) + '_' + str((dt.datetime.now().date().year)) +'.csv', index = False)
+    final.to_csv('/content/DB_final_driver_data_'+ str(pd.to_datetime(final['first_attempt_date']).dt.month.max()) + '_' + str((pd.to_datetime(final['first_attempt_date']).dt.year.max())) +'.csv', index = False)
 
 
 
@@ -324,7 +321,7 @@ def read_pipeline(url_agg:str, str_time_from_:str, str_time_to_:str, split_from_
   print('Phase 2: Preprocessing, Disputing, and Groupby Driver counting' + '-'*100)
   df = final_dispute(df)
   spliting_file(df, split_from=split_from_, split_to=split_to_)
-        # print
+  # print
   print(df['attempt_date'].unique())
   print("Number of Unique Driver_name: ", df['driver_name'].nunique())
   print("Number of Unique Driver_type: ", df['driver_type'].value_counts())
