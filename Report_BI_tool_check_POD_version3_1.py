@@ -1,4 +1,3 @@
-print('hello Ninja3_1!!!')
 
 import os
 import glob
@@ -15,10 +14,14 @@ from os import listdir
 from os.path import isfile, join
 import os
 from dateutil.relativedelta import relativedelta
+print('hello Ninja !!!' + str(pd.Timestamp.now()))
 
 drive.mount('/content/drive', force_remount=True)
 pd.set_option('display.max_columns', None)
 auth.authenticate_user()
+
+
+
 
 # module:
 def get_first_attempt_date(x):
