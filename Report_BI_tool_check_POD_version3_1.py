@@ -309,7 +309,7 @@ def export_final_driver_file(final):
 
 
 ### ___________________________________________________ Main ____________________________________________________________  
-def read_pipeline(read_7days, url_agg, str_time_from_, str_time_to_, split_from_, split_to_):
+def read_pipeline(read_7days:bool, url_agg:str, str_time_from_:str, str_time_to_:str, split_from_:str, split_to_:str):
   # reading and preprecessing
   print('Phase 1: Reading Data and preprocessing' + '-'*100)
   if read_7days:
