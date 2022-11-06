@@ -317,9 +317,10 @@ def read_pipeline(url_agg:str, str_time_from_:str, str_time_to_:str, split_from_
   # clear_output()
   big_frame = pd.concat([read_folder_pod_resultQA_in_month(str_time_from_, str_time_to_).drop(columns=['final_result', 'corrected_dispute']), reading_last_7_day()], ignore_index=False)
   df = pre_processing(big_frame.loc[(pd.to_datetime(big_frame['attempt_date']) >= pd.Timestamp(str_time_from_)) & (pd.to_datetime(big_frame['attempt_date']) <= pd.Timestamp(str_time_to_))])
-  print('Date collected: ', df['attempt_date'].unique())
   # dispute
   clear_output()
+  print('Date collected: ', df['attempt_date'].unique())
+
   print('Phase 2: Preprocessing, Disputing, and Groupby Driver counting' + '-'*100)
   df = final_dispute(df)
   spliting_file(df, split_from=split_from_, split_to=split_to_)
