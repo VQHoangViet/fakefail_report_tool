@@ -97,7 +97,7 @@ def pre_processing(x):
     x = get_first_attempt_date(x) ## 11/03/2022: get first attempt to mapping
     # notice: no_call_log_aloninja = fakefail (update: 30/09/2022)
     x['no_call_log_aloninja'] = 0
-    x.loc[x['count_call_log'].isna(), 'no_call_log_aloninja'] = 1
+    x.loc[(x['count_call_log'].isna()) | ((x['count_call_log']==0)), 'no_call_log_aloninja'] = 1
 
     print('#2')
 
