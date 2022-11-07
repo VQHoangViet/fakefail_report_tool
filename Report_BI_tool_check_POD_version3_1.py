@@ -222,7 +222,7 @@ def final_dispute(x):
 
 def spliting_file(x, split_from, split_to):
   x['attempt_date'] = pd.to_datetime(x['attempt_date']).dt.date
-  for i in x.loc[(x['attempt_date'] >= pd.Timestamp(split_from)) & (x['attempt_date'] >= pd.Timestamp(split_to)), 'attempt_date'].unique():
+  for i in x.loc[(x['attempt_date'] >= pd.Timestamp(split_from)) & (x['attempt_date'] <= pd.Timestamp(split_to)), 'attempt_date'].unique():
     x[x['attempt_date'] == i].to_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/Report BI Tool/Pre_processed data/'+str(i)+'.csv', index=False)
     print("Done file: " + str(i))
   print('DONE SLITING')
@@ -311,7 +311,7 @@ def read_pipeline(url_agg:str, str_time_from_:str, str_time_to_:str, split_from_
   #   sev = pd.DataFrame()
   # clear_output()
   big_frame = read_folder_pod_resultQA_in_month(str_time_from_, str_time_to_).drop(columns=['final_result', 'corrected_dispute'])
-  df = pre_processing(big_frame.loc[(pd.to_datetime(big_frame['attempt_date']) >= pd.Timestamp(str_time_from_)) & (pd.to_datetime(big_frame['attempt_date']) <= pd.Timestamp(str_time_to_))])
+  df = pre_processing(big_frame.loc[(pd.to_datetime(big_frame['attempt_date']) >= pd.Timestamp(str_time_from_)) & (pd.to_datetime(big_frame['attempt_date']) <= pd.Timestamp(str_time_to_))]).copy()
   # dispute
   clear_output()
   print('Date collected: ', df['attempt_date'].unique())
