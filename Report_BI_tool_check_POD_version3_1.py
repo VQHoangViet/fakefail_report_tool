@@ -145,7 +145,6 @@ def get_disputetime():
     return (dt.datetime.now() - dt.timedelta(days=5)).date()
 
 def final_dispute(x):
-
   ## Disputing
   x['attempt_datetime'] = pd.to_datetime(x['attempt_datetime'])
   x['final_result'] = 0
