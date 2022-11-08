@@ -150,6 +150,9 @@ def final_dispute(x):
   ## Disputing
   x['attempt_datetime'] = pd.to_datetime(x['attempt_datetime'])
   x['final_result'] = 0
+  x['corrected_dispute'] = 0
+  x['affected_by_mass_bug'] = 0
+
   url = [
     'https://docs.google.com/spreadsheets/d/1i1Rha9Qg1qZ9sGI0-ddX9QBlO6Jg9URy2tm62Fu3X20/edit#gid=1966091300',
     'https://docs.google.com/spreadsheets/d/1P0ohdLCGGvk037IHEFeiGvvc7l2bku5HIYCSgLT4i4o/edit#gid=419800374'
@@ -169,12 +172,10 @@ def final_dispute(x):
   disputing =  disputing.dropna(how='all', axis=1).dropna(how='all', axis=0).drop_duplicates(subset=['waypoint_id', 'order_id'])
   accepted_waypoint = disputing[disputing['Status'].isin(['Corrected', 'Product xin loại trừ', 'no'])]
   
-  x['corrected_dispute'] = 0
   x.loc[x['waypoint_id'].isin(accepted_waypoint['waypoint_id']), 'corrected_dispute'] = 1
 
   ### Mass bug
   # Lỗi sever 
-  x['affected_by_mass_bug'] = 0
   x.loc[(x.attempt_datetime >= pd.Timestamp(2022, 9, 28, 12, 00)) & (x.attempt_datetime <= pd.Timestamp(2022, 9, 29, 23, 59)),'affected_by_mass_bug'] = 1
   x.loc[(x.attempt_datetime >= pd.Timestamp(2022, 10, 5, 16, 30)) & (x.attempt_datetime <= pd.Timestamp(2022, 10, 5, 23, 59)),'affected_by_mass_bug'] = 1
   
@@ -202,31 +203,6 @@ def final_dispute(x):
 
   ## Nocode here
   print('Done Dispute!')
-
-  # url = [
-  #   'https://docs.google.com/spreadsheets/d/1KX1TceinNWG4_CCuN89VqXsLYnOquN-FnLIg_i1N-A8/edit#gid=0',
-  # ]
-
-  # disputing_after_final = pd.DataFrame()
-  # for i in url:
-  #   # holding temp data
-  #   print(i)
-  #   creds, _ = default()
-  #   gc = gspread.authorize(creds)
-  #   temp = gc.open_by_url(i).worksheet("Detail")
-  #   # Convert to a DataFrame and render.
-  #   disputing_after_final = pd.concat([disputing_after_final, get_as_dataframe(temp, evaluate_formulas=True)[['tracking_id','waypoint_id', 'Status']]])
-
-
-  # disputing_after_final =  disputing_after_final.dropna(how='all', axis=1).dropna(how='all', axis=0).drop_duplicates(subset=['waypoint_id', 'tracking_id'])
-  # corrected_dispute_after_final_waypoint = disputing_after_final[disputing_after_final['Status'].isin(['no'])]
-  
-  # x['corrected_dispute_after_final'] = 0
-  # x.loc[x['waypoint_id'].isin(corrected_dispute_after_final_waypoint['waypoint_id']), 'corrected_dispute_after_final'] = 1
-  # x.loc[(x.attempt_datetime >= pd.Timestamp(2022, 10, 1)) & (x.attempt_datetime <= pd.Timestamp(2022, 10, 15))].to_csv('/content/raw1_15_thang10.csv', index=False)
-  # x.loc[(x.attempt_datetime >= pd.Timestamp(2022, 10, 16)) & (x.attempt_datetime <= pd.Timestamp(2022, 10, 25))].to_csv('/content/raw16_25_thang10.csv', index=False)
-  # print('Done Dispute combine!')
-
   return pd.DataFrame(x)
 
 def spliting_file(x, split_from, split_to):
@@ -330,10 +306,8 @@ def read_pipeline(url_agg:str, str_time_from_:str, str_time_to_:str, split_from_
   # else:
   #   sev = pd.DataFrame()
   # clear_output()
-  try:
-    big_frame = read_folder_pod_resultQA_in_month(str_time_from_, str_time_to_).drop(columns=['final_result', 'corrected_dispute'])
-  except:
-    big_frame = read_folder_pod_resultQA_in_month(str_time_from_, str_time_to_)
+
+  big_frame = read_folder_pod_resultQA_in_month(str_time_from_, str_time_to_)
   df = pre_processing(big_frame.loc[(pd.to_datetime(big_frame['attempt_date']) >= pd.Timestamp(str_time_from_)) & (pd.to_datetime(big_frame['attempt_date']) <= pd.Timestamp(str_time_to_))])
 
 
@@ -346,7 +320,6 @@ def read_pipeline(url_agg:str, str_time_from_:str, str_time_to_:str, split_from_
   print('Phase 2: Preprocessing, Disputing, and Groupby Driver counting' + '-'*100)
   df = final_dispute(df)
   spliting_file(df, split_from=split_from_, split_to=split_to_)
-  # print
 
 
 
