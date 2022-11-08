@@ -77,6 +77,8 @@ def read_folder_pod_resultQA_in_month(str_time_from, str_time_to):
       dfs.append(x)
   big_frame = pd.concat(dfs, ignore_index=False)  # Concatenate all data into one DataFram
   print(big_frame.shape)
+  print(big_frame.info())
+
   return big_frame
 
 # Phase 2: pre-processing, dispute
