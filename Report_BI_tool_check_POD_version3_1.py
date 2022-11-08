@@ -340,7 +340,7 @@ def read_pipeline(url_agg:str, str_time_from_:str, str_time_to_:str, split_from_
   print('Date collected: ', df['attempt_date'].unique())
 
   print('Phase 2: Preprocessing, Disputing, and Groupby Driver counting' + '-'*100)
-  # df = final_dispute(df)
+  df = final_dispute(df)
   spliting_file(df, split_from=split_from_, split_to=split_to_)
   # print
 
