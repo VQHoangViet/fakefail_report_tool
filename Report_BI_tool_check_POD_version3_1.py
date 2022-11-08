@@ -139,7 +139,7 @@ def pre_processing(x):
     x =  x.dropna(how='all', axis=1).dropna(how='all', axis=0)
     print('#end')
 
-    return pd.DataFrame(x)
+    return x
 
 def get_disputetime():
     return (dt.datetime.now() - dt.timedelta(days=5)).date()
@@ -237,6 +237,7 @@ def spliting_file(x, split_from, split_to):
 
 
 def sales_channel(x):
+  print(x.info())
   x.loc[(~x['sales_channel'].isna()) & (x['result']=='fake_fail')].groupby(['first_attempt_date','region', 'sales_channel'])['tracking_id'].nunique().reset_index().to_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/FF Oct Final/sales_channels_ffcase ' + str((pd.to_datetime(x['first_attempt_date']).dt.year.max())) + "_" + str(pd.to_datetime(x['first_attempt_date']).dt.month.min()) +'_to_'+ str((pd.to_datetime(x['first_attempt_date']).dt.year.max())) + "_" + str(pd.to_datetime(x['first_attempt_date']).dt.month.max()) +'.csv', index = False)
   print('Done sales_channel~~~~~~~~~~~~~~')
 
