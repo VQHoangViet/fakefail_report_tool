@@ -187,6 +187,14 @@ def final_dispute(x):
            (x['callee_'].isin(mobi_) | x['driver_contact_'].isin(mobi_))
         ), 'affected_by_mass_bug'] = 1
 
+  # collecting tu form product:
+  creds, _ = default()
+  gc = gspread.authorize(creds)
+  temp = gc.open_by_url('https://docs.google.com/spreadsheets/d/1TLprj6Z9eerZzhph1nf24hyrBz_ApRYHlXZpmGSauww/edit#gid=1140839304').worksheet("Form Responses 1")
+  tid_product_form = get_as_dataframe(temp, evaluate_formulas=True)[['Mã đơn hàng (TID)', 'PDT confirm']].rename(columns={"Mã đơn hàng (TID)": 'tracking_id' }, inplace=True).dropna(how='all', axis=1).dropna(how='all', axis=0).drop_duplicates(subset=['tracking_id'])
+  x.loc[(x['tracking_id'].isin(tid_product_form.loc[tid_product_form['PDT confirm'] =='accept','tracking_id'])),'affected_by_mass_bug'] = 1
+  
+
   # final:
   print(x[ (x['result'] == 'fake_fail') & ((x['affected_by_mass_bug'] == 0) & (x['corrected_dispute'] == 0)) ].shape)
   x.loc[ (x['result'] == 'fake_fail') & ((x['affected_by_mass_bug'] == 0) & (x['corrected_dispute'] == 0))   , 'final_result'] = 1
@@ -354,4 +362,4 @@ def read_pipeline(url_agg:str, str_time_from_:str, str_time_to_:str, split_from_
   print('Final: ' + '-'*100)
   final = compute_phase(driver)
   export_final_driver_file(final)
-  return final
+  return df, final
