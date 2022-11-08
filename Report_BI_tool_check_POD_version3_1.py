@@ -227,6 +227,14 @@ def spliting_file(x, split_from, split_to):
     print("Done file: " + str(i))
   print('DONE SLITING')
 
+
+def sales_channel(x):
+  x.loc[(~x['sales_channel'].isna()) & (x['result']=='fake_fail')].groupby(['first_attempt_date','region', 'sales_channel'])['tracking_id'].nunique().reset_index().to_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/FF Oct Final/sales_channels_ffcase ' + str((pd.to_datetime(x['first_attempt_date']).dt.year.max())) + "_" + str(pd.to_datetime(x['first_attempt_date']).dt.month.min()) +'_to_'+ str((pd.to_datetime(x['first_attempt_date']).dt.year.max())) + "_" + str(pd.to_datetime(x['first_attempt_date']).dt.month.max()) +'.csv', index = False)
+  print('Done sales_channel')
+
+
+
+
 # Phase 3: grouping
 def bi_agg(x):
     names = {
@@ -314,8 +322,12 @@ def read_pipeline(url_agg:str, str_time_from_:str, str_time_to_:str, split_from_
   # clear_output()
   big_frame = read_folder_pod_resultQA_in_month(str_time_from_, str_time_to_).drop(columns=['final_result', 'corrected_dispute'])
   df = pre_processing(big_frame.loc[(pd.to_datetime(big_frame['attempt_date']) >= pd.Timestamp(str_time_from_)) & (pd.to_datetime(big_frame['attempt_date']) <= pd.Timestamp(str_time_to_))]).copy()
+
+
   # dispute
   clear_output()
+  sales_channel(df)
+
   print('Date collected: ', df['attempt_date'].unique())
 
   print('Phase 2: Preprocessing, Disputing, and Groupby Driver counting' + '-'*100)
