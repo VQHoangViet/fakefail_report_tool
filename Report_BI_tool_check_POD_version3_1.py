@@ -340,20 +340,21 @@ def read_pipeline(url_agg:str, str_time_from_:str, str_time_to_:str, split_from_
   print('Date collected: ', df['attempt_date'].unique())
 
   print('Phase 2: Preprocessing, Disputing, and Groupby Driver counting' + '-'*100)
-  df = final_dispute(df)
+  # df = final_dispute(df)
   spliting_file(df, split_from=split_from_, split_to=split_to_)
   # print
+
+
+
+
+  # pre-compute phase
+  clear_output()
   print(df['attempt_date'].unique())
   print("Number of Unique Driver_name: ", df['driver_name'].nunique())
   print("Number of Unique Driver_type: ", df['driver_type'].value_counts())
   print("Number of Uni Hub name: ", df['hub_name'].nunique())
   print("Shape: ", df.shape)
   print(df.info())
-
-
-
-  # pre-compute phase
-  clear_output()
   print('Phase 3: Mapping' + '-'*100)
   driver = mapping_phase(df, url_agg)
 
