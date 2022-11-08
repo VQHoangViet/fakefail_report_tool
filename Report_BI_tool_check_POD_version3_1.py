@@ -238,7 +238,7 @@ def spliting_file(x, split_from, split_to):
 
 def sales_channel(x):
   x.loc[(~x['sales_channel'].isna()) & (x['result']=='fake_fail')].groupby(['first_attempt_date','region', 'sales_channel'])['tracking_id'].nunique().reset_index().to_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/FF Oct Final/sales_channels_ffcase ' + str((pd.to_datetime(x['first_attempt_date']).dt.year.max())) + "_" + str(pd.to_datetime(x['first_attempt_date']).dt.month.min()) +'_to_'+ str((pd.to_datetime(x['first_attempt_date']).dt.year.max())) + "_" + str(pd.to_datetime(x['first_attempt_date']).dt.month.max()) +'.csv', index = False)
-  print('Done sales_channel', x.loc[(~x['sales_channel'].isna()) & (x['result']=='fake_fail'), 'first_attempt_date'].sort_values('first_attempt_date').unique())
+  print('Done sales_channel', set(x.loc[(~x['sales_channel'].isna()) & (x['result']=='fake_fail'), 'first_attempt_date']))
 
 
 
