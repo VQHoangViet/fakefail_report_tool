@@ -193,7 +193,7 @@ def final_dispute(x):
   creds, _ = default()
   gc = gspread.authorize(creds)
   temp = gc.open_by_url('https://docs.google.com/spreadsheets/d/1TLprj6Z9eerZzhph1nf24hyrBz_ApRYHlXZpmGSauww/edit#gid=1140839304').worksheet("Form Responses 1")
-  tid_product_form = get_as_dataframe(temp, evaluate_formulas=True)[['Mã đơn hàng (TID)', 'PDT confirm']].rename(columns={"Mã đơn hàng (TID)": 'tracking_id' }, inplace=True).dropna(how='all', axis=1).dropna(how='all', axis=0).drop_duplicates(subset=['tracking_id'])
+  tid_product_form = get_as_dataframe(temp, evaluate_formulas=True)[['Mã đơn hàng (TID)', 'PDT confirm']].dropna(how='all', axis=1).dropna(how='all', axis=0).drop_duplicates(subset=['tracking_id']).rename(columns={"Mã đơn hàng (TID)": 'tracking_id' })
   x.loc[(x['tracking_id'].isin(tid_product_form.loc[tid_product_form['PDT confirm'] =='accept','tracking_id'])),'affected_by_mass_bug'] = 1
   
 
