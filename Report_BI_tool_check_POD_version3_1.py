@@ -152,7 +152,7 @@ def final_dispute(x):
   x['final_result'] = 0
   x['corrected_dispute'] = 0
   x['affected_by_mass_bug'] = 0
-
+  x['affected_by_discreting_bug'] = 0
   url = [
     'https://docs.google.com/spreadsheets/d/1i1Rha9Qg1qZ9sGI0-ddX9QBlO6Jg9URy2tm62Fu3X20/edit#gid=1966091300',
     'https://docs.google.com/spreadsheets/d/1P0ohdLCGGvk037IHEFeiGvvc7l2bku5HIYCSgLT4i4o/edit#gid=419800374'
@@ -188,18 +188,18 @@ def final_dispute(x):
   x.loc[(  ( (x.attempt_datetime >= pd.Timestamp(2022, 10, 24, 6)) & (x.attempt_datetime <= pd.Timestamp(2022, 10, 24, 23, 59)) ) &
            (x['callee_'].isin(mobi_) | x['driver_contact_'].isin(mobi_))
         ), 'affected_by_mass_bug'] = 1
-
+  x = x.drop(columns=['callee_', 'driver_contact_'])
   # collecting tu form product:
   creds, _ = default()
   gc = gspread.authorize(creds)
   temp = gc.open_by_url('https://docs.google.com/spreadsheets/d/1TLprj6Z9eerZzhph1nf24hyrBz_ApRYHlXZpmGSauww/edit#gid=1140839304').worksheet("Form Responses 1")
   tid_product_form = get_as_dataframe(temp, evaluate_formulas=True).dropna(how='all', axis=1).dropna(how='all', axis=0).drop_duplicates(subset=['Mã đơn hàng (TID)']).rename(columns={"Mã đơn hàng (TID)": 'tracking_id' })[['tracking_id', 'PDT confirm']]
-  x.loc[(x['tracking_id'].isin(tid_product_form.loc[tid_product_form['PDT confirm'] =='accept','tracking_id'])),'affected_by_mass_bug'] = 1
+  x.loc[(x['tracking_id'].isin(tid_product_form.loc[tid_product_form['PDT confirm'] =='accept','tracking_id'])) & (x['tracking_id'].isin(x.loc[x['affected_by_mass_bug'] == 0,'tracking_id'])),'affected_by_discreting_bug'] = 1
   
 
   # final:
-  print(x[ (x['result'] == 'fake_fail') & ((x['affected_by_mass_bug'] == 0) & (x['corrected_dispute'] == 0)) ].shape)
-  x.loc[ (x['result'] == 'fake_fail') & ((x['affected_by_mass_bug'] == 0) & (x['corrected_dispute'] == 0))   , 'final_result'] = 1
+  print('Bug case: ', x[ (x['result'] == 'fake_fail') & (x['affected_by_discreting_bug'] == 0) & ((x['affected_by_mass_bug'] == 0) & (x['corrected_dispute'] == 0)) ].shape)
+  x.loc[ (x['result'] == 'fake_fail') & (x['affected_by_discreting_bug'] == 0) & ((x['affected_by_mass_bug'] == 0) & (x['corrected_dispute'] == 0))   , 'final_result'] = 1
 
   ## Nocode here
   print('Done Dispute!')
@@ -247,7 +247,7 @@ def bi_agg(x):
         'total_orders': x['order_id'].nunique(),
         'total_fake_fail_orders': x[x['result']=='fake_fail']['order_id'].nunique(),
         'correted_by_disputing_orders':  x[(x['corrected_dispute']==1) & (x['result']=='fake_fail')]['order_id'].nunique(),
-        'total_orders_affected_by_mass_bug': x[(x['affected_by_mass_bug']==1) & (x['result']=='fake_fail')]['order_id'].nunique(),
+        'total_orders_affected_by_bug': x[(x['affected_by_discreting_bug']==1) & (x['affected_by_mass_bug']==1) & (x['result']=='fake_fail')]['order_id'].nunique(),
         'real_FF_orders': x[(x['final_result']==1)]['order_id'].nunique(),
         'Final_Fake_fail_tracking_id_list': x[(x['final_result']==1)]['tracking_id'].unique()
         }
@@ -320,7 +320,7 @@ def read_pipeline(url_agg:str, str_time_from_:str, str_time_to_:str, split_from_
   print('Phase 2: Preprocessing, Disputing, and Groupby Driver counting' + '-'*100)
   df = final_dispute(df)
   spliting_file(df, split_from=split_from_, split_to=split_to_)
-
+  
 
 
 
