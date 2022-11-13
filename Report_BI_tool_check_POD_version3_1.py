@@ -157,7 +157,7 @@ def final_dispute(x):
   ]
   disputing = pd.DataFrame()
   for i in url:
-    temp = pd.read_csv('https://docs.google.com/spreadsheets/d/' + str(i.split("d/")[1].split("/e")[0]) + '/export?gid={}&format=csv'.format(i.split("=")[1]))[['order_id','waypoint_id', 'Status']]
+    temp = pd.read_csv('https://docs.google.com/spreadsheets/d/' + str(i.split("d/")[1].split("/e")[0]) + '/export?gid={}&format=csv'.format(i.split("=")[1]), on_bad_lines='skip')[['order_id','waypoint_id', 'Status']]
     disputing = pd.concat([disputing, temp])
   disputing =  disputing.dropna(how='all', axis=1).dropna(how='all', axis=0).drop_duplicates(subset=['waypoint_id', 'order_id'])
   accepted_waypoint = disputing[disputing['Status'].isin(['Corrected', 'Product xin loại trừ', 'no'])]
