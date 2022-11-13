@@ -37,26 +37,23 @@ def get_first_attempt_date(x):
 # Phase1: reading data
 def reading_last_7_day():
   url = [
-    'https://docs.google.com/spreadsheets/d/11R3RKcyleeHDQPr2y3QpiOLReyc5_T8h2DNwS2fEYlA/edit#gid=0', ## thu 2
-    'https://docs.google.com/spreadsheets/d/1uKSr4flvsSvejRHPid1Ja718Ozl9XFXZAuxi2mVYbKI/edit#gid=0', ## thu3
-    'https://docs.google.com/spreadsheets/d/1XEXt04xtTfsdX3D0rLRriO2XpOxDLI93j9DX2YW1Fys/edit#gid=0', ## thu 4
-    'https://docs.google.com/spreadsheets/d/1U9PeYtVqxQOjl5za9UfxuSZmcKC3U_Z3Y9Ym1kxMhyM/edit#gid=0', ## Thu 5
-    'https://docs.google.com/spreadsheets/d/1Q-igQBq0CnR14PWokk4GZcOn3iJ7RboUKFSp6bMiOcg/edit#gid=0', ## Thu 6
-    'https://docs.google.com/spreadsheets/d/1kPl5-R6FpuRLiNvVmicSQCMYorXqWkUx1V9Frdj8_Ig/edit#gid=0',  ## thu 7
-    'https://docs.google.com/spreadsheets/d/1Z7wGCT4Sh8mQl69nSMZxDuMbbaWBEbWewlWQr_xm9T0/edit', ## cn 
+  'https://docs.google.com/spreadsheets/d/11R3RKcyleeHDQPr2y3QpiOLReyc5_T8h2DNwS2fEYlA/edit#gid=0', ## thu 2
+  'https://docs.google.com/spreadsheets/d/1uKSr4flvsSvejRHPid1Ja718Ozl9XFXZAuxi2mVYbKI/edit#gid=0', ## thu3
+  'https://docs.google.com/spreadsheets/d/1XEXt04xtTfsdX3D0rLRriO2XpOxDLI93j9DX2YW1Fys/edit#gid=0', ## thu 4
+  'https://docs.google.com/spreadsheets/d/1U9PeYtVqxQOjl5za9UfxuSZmcKC3U_Z3Y9Ym1kxMhyM/edit#gid=0', ## Thu 5
+  'https://docs.google.com/spreadsheets/d/1Q-igQBq0CnR14PWokk4GZcOn3iJ7RboUKFSp6bMiOcg/edit#gid=0', ## Thu 6
+  'https://docs.google.com/spreadsheets/d/1kPl5-R6FpuRLiNvVmicSQCMYorXqWkUx1V9Frdj8_Ig/edit#gid=0',  ## thu 7
+  'https://docs.google.com/spreadsheets/d/1Z7wGCT4Sh8mQl69nSMZxDuMbbaWBEbWewlWQr_xm9T0/edit', ## cn 
 
   ]
 
-  bi_data_raw = pd.DataFrame()
   for i in url:
-    # holding temp data
-    print(i)
-    creds, _ = default()
-    gc = gspread.authorize(creds)
-    temp = gc.open_by_url(i).worksheet("Sheet1")
-    # Convert to a DataFrame and render.
-    bi_data_raw = pd.concat([bi_data_raw, get_as_dataframe(temp)])
-  return bi_data_raw.dropna(how='all', axis=1).dropna(how='all', axis=0)
+    test = pd.read_csv('https://docs.google.com/spreadsheets/d/' + 
+                    str(i.split("d/")[1].split("/e")[0]) +
+                  '/export?gid=0&format=csv')
+    test.to_csv('/content/{}.csv'.format(test['attempt_date'].unique()[0]))
+    print('Done File: {}'.format(test['attempt_date'].unique()[0]))
+  
 
 def read_folder_pod_resultQA_in_month(str_time_from, str_time_to):
   # Get data file names
@@ -301,12 +298,7 @@ def read_pipeline(url_agg:str, str_time_from_:str, str_time_to_:str, split_from_
 
   # reading and preprecessing
   print('Phase 1: Reading Data and preprocessing' + '-'*100)
-  # if read_sevdays==True:
-  #   sev = reading_last_7_day()
-  # else:
-  #   sev = pd.DataFrame()
-  # clear_output()
-
+  reading_last_7_day()
   big_frame = read_folder_pod_resultQA_in_month(str_time_from_, str_time_to_)
   df = pre_processing(big_frame.loc[(pd.to_datetime(big_frame['attempt_date']) >= pd.Timestamp(str_time_from_)) & (pd.to_datetime(big_frame['attempt_date']) <= pd.Timestamp(str_time_to_))])
 
