@@ -150,20 +150,17 @@ def final_dispute(x):
   x['corrected_dispute'] = 0
   x['affected_by_mass_bug'] = 0
   x['affected_by_discreting_bug'] = 0
+
   url = [
     'https://docs.google.com/spreadsheets/d/1i1Rha9Qg1qZ9sGI0-ddX9QBlO6Jg9URy2tm62Fu3X20/edit#gid=1966091300',
     'https://docs.google.com/spreadsheets/d/1P0ohdLCGGvk037IHEFeiGvvc7l2bku5HIYCSgLT4i4o/edit#gid=419800374'
   ]
 
-  disputing = pd.DataFrame()
   for i in url:
-    # holding temp data
-    print(i)
-    creds, _ = default()
-    gc = gspread.authorize(creds)
-    temp = gc.open_by_url(i).worksheet("Detail")
-    # Convert to a DataFrame and render.
-    disputing = pd.concat([disputing, get_as_dataframe(temp, evaluate_formulas=True)[['order_id','waypoint_id', 'Status']]])
+    disputing = pd.concat([disputing, pd.read_csv(('https://docs.google.com/spreadsheets/d/' + 
+                  str(i.split(r"d/")[1].split("/e")[0]) +
+                '/export?gid={}&format=csv'.format(i.split("=")[1])))[['order_id','waypoint_id', 'Status']]])
+
 
 
   disputing =  disputing.dropna(how='all', axis=1).dropna(how='all', axis=0).drop_duplicates(subset=['waypoint_id', 'order_id'])
