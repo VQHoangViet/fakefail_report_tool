@@ -51,7 +51,7 @@ def reading_last_7_day():
     test = pd.read_csv('https://docs.google.com/spreadsheets/d/' + 
                     str(i.split("d/")[1].split("/e")[0]) +
                   '/export?gid=0&format=csv')
-    test.to_csv('/content/{}.csv'.format(test['attempt_date'].unique()[0]))
+    test.to_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/Report BI Tool/Pre_processed data/{}.csv'.format(test['attempt_date'].unique()[0]))
     print('Done File: {}'.format(test['attempt_date'].unique()[0]))
   
 
