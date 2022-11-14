@@ -50,7 +50,8 @@ def reading_last_7_day():
   for i in url:
     test = pd.read_csv('https://docs.google.com/spreadsheets/d/' + 
                     str(i.split("d/")[1].split("/e")[0]) +
-                  '/export?gid=0&format=csv')
+                  '/export?gid=0&format=csv').drop_duplicates(subset=['order_id', 'waypoint_id'], keep='last')
+
     test.to_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/Report BI Tool/Pre_processed data/{}.csv'.format(test['attempt_date'].unique()[0]), index=False)
     print('Done File: {}'.format(test['attempt_date'].unique()[0]))
   
@@ -88,18 +89,9 @@ def driver_finder(x):
 def pre_processing(x):
     # save version data:
     x['no_call_log_aloninja'] = 0
-    x.loc[(x['count_call_log'].isna()) | ((x['count_call_log']==0)), 'no_call_log_aloninja'] = 1
-    x.rename(columns={
-        'Thời gian ghi nhận fail attempt phải trước 10PM':'Fail attempt sau 10PM',
-        'Lịch sử tối thiểu 3 cuộc gọi':'Lịch sử tối thiểu 3 cuộc gọi ra',
-        'Thời gian đổ chuông >10s trong trường hợp khách không nghe máy':'Tối thiểu 3 cuộc gọi với thời gian đổ chuông >10s trong trường hợp khách không nghe máy',
-        'Thời gian giữa mỗi cuộc gọi tối thiểu 1 phút':'Thời gian giữa mỗi cuộc gọi tối thiểu 1p',
-        'no_call_log_aloninja':'Không có cuộc gọi tiêu chuẩn',
-        'No Record':'Không có cuộc gọi thành công'
-      })
+
     try:
       x.drop(columns=['Unnamed: 0', 'mass_down_server', 'disputing', 'Cuộc gọi phải phát sinh trước 8PM'], inplace=True)
-     
     except:
       pass
     print('#1')
@@ -136,7 +128,6 @@ def pre_processing(x):
     # drop dupli waypoint_id AND tracking_id
     # bug: drop được duplicate nhưng bị mất FF attempt nếu nằm ở đầu (fixed)
     x = x.sort_values(['attempt_datetime'])
-    x = x.drop_duplicates(subset=['order_id', 'waypoint_id'], keep='last')
     print('#6')
 
     # find driver type
