@@ -150,15 +150,22 @@ def final_dispute(x):
   x['corrected_dispute'] = 0
   x['affected_by_mass_bug'] = 0
   x['affected_by_discreting_bug'] = 0
-
   url = [
     'https://docs.google.com/spreadsheets/d/1i1Rha9Qg1qZ9sGI0-ddX9QBlO6Jg9URy2tm62Fu3X20/edit#gid=1966091300',
     'https://docs.google.com/spreadsheets/d/1P0ohdLCGGvk037IHEFeiGvvc7l2bku5HIYCSgLT4i4o/edit#gid=419800374'
   ]
+
   disputing = pd.DataFrame()
   for i in url:
-    temp = pd.read_csv('https://docs.google.com/spreadsheets/d/' + str(i.split("d/")[1].split("/e")[0]) + '/export?gid={}&format=csv'.format(i.split("=")[1]), on_bad_lines='skip')[['order_id','waypoint_id', 'Status']]
-    disputing = pd.concat([disputing, temp])
+    # holding temp data
+    print(i)
+    creds, _ = default()
+    gc = gspread.authorize(creds)
+    temp = gc.open_by_url(i).worksheet("Detail")
+    # Convert to a DataFrame and render.
+    disputing = pd.concat([disputing, get_as_dataframe(temp, evaluate_formulas=True)[['order_id','waypoint_id', 'Status']]])
+
+
   disputing =  disputing.dropna(how='all', axis=1).dropna(how='all', axis=0).drop_duplicates(subset=['waypoint_id', 'order_id'])
   accepted_waypoint = disputing[disputing['Status'].isin(['Corrected', 'Product xin loại trừ', 'no'])]
   
@@ -180,10 +187,12 @@ def final_dispute(x):
         ), 'affected_by_mass_bug'] = 1
   x = x.drop(columns=['callee_', 'driver_contact_'])
   # collecting tu form product:
-  tid_product_form = pd.read_csv(('https://docs.google.com/spreadsheets/d/' + 
-                  '1TLprj6Z9eerZzhph1nf24hyrBz_ApRYHlXZpmGSauww' +
-                '/export?gid=1140839304&format=csv')).dropna(how='all', axis=1).dropna(how='all', axis=0).drop_duplicates(subset=['Mã đơn hàng (TID)']).rename(columns={"Mã đơn hàng (TID)": 'tracking_id' })[['tracking_id', 'PDT confirm']]
+  creds, _ = default()
+  gc = gspread.authorize(creds)
+  temp = gc.open_by_url('https://docs.google.com/spreadsheets/d/1TLprj6Z9eerZzhph1nf24hyrBz_ApRYHlXZpmGSauww/edit#gid=1140839304').worksheet("Form Responses 1")
+  tid_product_form = get_as_dataframe(temp, evaluate_formulas=True).dropna(how='all', axis=1).dropna(how='all', axis=0).drop_duplicates(subset=['Mã đơn hàng (TID)']).rename(columns={"Mã đơn hàng (TID)": 'tracking_id' })[['tracking_id', 'PDT confirm']]
   x.loc[(x['tracking_id'].isin(tid_product_form.loc[tid_product_form['PDT confirm'] =='accept','tracking_id'])) & (x['tracking_id'].isin(x.loc[x['affected_by_mass_bug'] == 0,'tracking_id'])),'affected_by_discreting_bug'] = 1
+  
 
   # final:
   print('Bug case: ', x[ (x['result'] == 'fake_fail') & (x['affected_by_discreting_bug'] == 0) & ((x['affected_by_mass_bug'] == 0) & (x['corrected_dispute'] == 0)) ].shape)
