@@ -99,7 +99,6 @@ def pre_processing(x):
     # notice: no_call_log_aloninja = fakefail (update: 30/09/2022)
 
     print('#2')
-    Thời gian đổ chuông >10s trong trường hợp khách không nghe máy
     # CONVERT data_type
     x['attempt_datetime'] = pd.to_datetime(x['attempt_datetime'])
     x[['hub_id', 'order_id', 'waypoint_id']] = x[['hub_id', 'order_id', 'waypoint_id']].astype('int64')
