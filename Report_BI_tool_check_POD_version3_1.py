@@ -104,7 +104,6 @@ def pre_processing(x):
       pass
     print('#1')
     x.attempt_datetime = pd.to_datetime(x.attempt_datetime)
-    x = get_first_attempt_date(x) ## 11/03/2022: get first attempt to mapping
     # notice: no_call_log_aloninja = fakefail (update: 30/09/2022)
 
     print('#2')
@@ -143,6 +142,11 @@ def pre_processing(x):
     # find driver type
     x['driver_type'] =  x.driver_name.apply(driver_finder)
     x =  x.dropna(how='all', axis=1).dropna(how='all', axis=0)
+
+    print('#7')
+
+    x = get_first_attempt_date(x) ## 11/03/2022: get first attempt to mapping
+
     print('#end')
 
     return x
