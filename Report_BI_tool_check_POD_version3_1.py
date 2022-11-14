@@ -51,7 +51,7 @@ def reading_last_7_day():
     test = pd.read_csv('https://docs.google.com/spreadsheets/d/' + 
                     str(i.split("d/")[1].split("/e")[0]) +
                   '/export?gid=0&format=csv')
-    test.to_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/Report BI Tool/Pre_processed data/{}.csv'.format(test['attempt_date'].unique()[0]))
+    test.to_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/Report BI Tool/Pre_processed data/{}.csv'.format(test['attempt_date'].unique()[0]), index=False)
     print('Done File: {}'.format(test['attempt_date'].unique()[0]))
   
 
@@ -89,10 +89,7 @@ def pre_processing(x):
     # save version data:
     x['no_call_log_aloninja'] = 0
     x.loc[(x['count_call_log'].isna()) | ((x['count_call_log']==0)), 'no_call_log_aloninja'] = 1
-
-    try:
-      x.drop(columns=['Unnamed: 0', 'mass_down_server', 'disputing', 'Cuộc gọi phải phát sinh trước 8PM'], inplace=True)
-      x.rename(columns={
+    x.rename(columns={
         'Thời gian ghi nhận fail attempt phải trước 10PM':'Fail attempt sau 10PM',
         'Lịch sử tối thiểu 3 cuộc gọi':'Lịch sử tối thiểu 3 cuộc gọi ra',
         'Thời gian đổ chuông >10s trong trường hợp khách không nghe máy':'Tối thiểu 3 cuộc gọi với thời gian đổ chuông >10s trong trường hợp khách không nghe máy',
@@ -100,6 +97,9 @@ def pre_processing(x):
         'no_call_log_aloninja':'Không có cuộc gọi tiêu chuẩn',
         'No Record':'Không có cuộc gọi thành công'
       })
+    try:
+      x.drop(columns=['Unnamed: 0', 'mass_down_server', 'disputing', 'Cuộc gọi phải phát sinh trước 8PM'], inplace=True)
+     
     except:
       pass
     print('#1')
