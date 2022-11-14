@@ -87,35 +87,42 @@ def driver_finder(x):
 
 def pre_processing(x):
     # save version data:
+    x['no_call_log_aloninja'] = 0
+    x.loc[(x['count_call_log'].isna()) | ((x['count_call_log']==0)), 'no_call_log_aloninja'] = 1
+
     try:
-      x.drop(columns=['Unnamed: 0', 'mass_down_server', 'disputing'], inplace=True)
+      x.drop(columns=['Unnamed: 0', 'mass_down_server', 'disputing', 'Cuộc gọi phải phát sinh trước 8PM'], inplace=True)
+      x.rename(columns={
+        'Thời gian ghi nhận fail attempt phải trước 10PM':'Fail attempt sau 10PM',
+        'Lịch sử tối thiểu 3 cuộc gọi':'Lịch sử tối thiểu 3 cuộc gọi ra',
+        'Thời gian đổ chuông >10s trong trường hợp khách không nghe máy':'Tối thiểu 3 cuộc gọi với thời gian đổ chuông >10s trong trường hợp khách không nghe máy',
+        'Thời gian giữa mỗi cuộc gọi tối thiểu 1 phút':'Thời gian giữa mỗi cuộc gọi tối thiểu 1p',
+        'no_call_log_aloninja':'Không có cuộc gọi tiêu chuẩn',
+        'No Record':'Không có cuộc gọi thành công'
+      })
     except:
       pass
     print('#1')
     x.attempt_datetime = pd.to_datetime(x.attempt_datetime)
     x = get_first_attempt_date(x) ## 11/03/2022: get first attempt to mapping
     # notice: no_call_log_aloninja = fakefail (update: 30/09/2022)
-    x['no_call_log_aloninja'] = 0
-    x.loc[(x['count_call_log'].isna()) | ((x['count_call_log']==0)), 'no_call_log_aloninja'] = 1
 
     print('#2')
 
     # CONVERT data_type
     x['attempt_datetime'] = pd.to_datetime(x['attempt_datetime'])
     x[['hub_id', 'order_id', 'waypoint_id']] = x[['hub_id', 'order_id', 'waypoint_id']].astype('int64')
-    x[['reason_no' , 'Thời gian ghi nhận fail attempt phải trước 10PM' ,
-        'Cuộc gọi phải phát sinh trước 8PM',
-        'Lịch sử tối thiểu 3 cuộc gọi',
-        'Thời gian giữa mỗi cuộc gọi tối thiểu 1 phút',
+    x[['reason_no' , 'Fail attempt sau 10PM' ,
+        'Lịch sử tối thiểu 3 cuộc gọi ra',
+        'Thời gian giữa mỗi cuộc gọi tối thiểu 1p',
         'Thời gian gọi sớm hơn hoặc bằng thời gian xử lý thất bại',
         'Thời gian đổ chuông >10s trong trường hợp khách không nghe máy' ,
-        'No Record', 'no_call_log_aloninja']] = x[['reason_no' , 'Thời gian ghi nhận fail attempt phải trước 10PM' ,
-        'Cuộc gọi phải phát sinh trước 8PM',
-        'Lịch sử tối thiểu 3 cuộc gọi',
-        'Thời gian giữa mỗi cuộc gọi tối thiểu 1 phút',
+        'Không có cuộc gọi thành công', 'Không có cuộc gọi tiêu chuẩn', 'Không có hình ảnh POD']] = x[['reason_no' , 'Fail attempt sau 10PM' ,
+        'Lịch sử tối thiểu 3 cuộc gọi ra',
+        'Thời gian giữa mỗi cuộc gọi tối thiểu 1p',
         'Thời gian gọi sớm hơn hoặc bằng thời gian xử lý thất bại',
         'Thời gian đổ chuông >10s trong trường hợp khách không nghe máy' ,
-        'No Record', 'no_call_log_aloninja']].replace('-', 0).astype('float64')
+        'Không có cuộc gọi thành công', 'Không có cuộc gọi tiêu chuẩn', 'Không có hình ảnh POD']].replace('-', 0).astype('float64')
    
     # dropna columns 
     print('#3')
@@ -222,15 +229,16 @@ def sales_channel(x):
 # Phase 3: grouping
 def bi_agg(x):
     names = {
-        # note: count by attempt
-        'Thời gian ghi nhận fail attempt phải trước 10PM': x[x['Thời gian ghi nhận fail attempt phải trước 10PM']==1]['waypoint_id'].count(),
-        'Cuộc gọi phải phát sinh trước 8PM': x[x['Cuộc gọi phải phát sinh trước 8PM']==1]['waypoint_id'].count(),
-        'Lịch sử tối thiểu 3 cuộc gọi': x[x['Lịch sử tối thiểu 3 cuộc gọi']==1]['waypoint_id'].count(),
-        'Thời gian giữa mỗi cuộc gọi tối thiểu 1 phút': x[x['Thời gian giữa mỗi cuộc gọi tối thiểu 1 phút']==1]['waypoint_id'].count(),
+        # note: count by attempt         # 'Cuộc gọi phải phát sinh trước 8PM': x[x['Cuộc gọi phải phát sinh trước 8PM']==1]['waypoint_id'].count(), (đã bị loại bỏ vào ngày 14/11/2022)
+        'Fail attempt sau 10PM': x[(x['Fail attempt sau 10PM']==1)]['waypoint_id'].count(),
+        'Lịch sử tối thiểu 3 cuộc gọi ra': x[x['Lịch sử tối thiểu 3 cuộc gọi ra']==1]['waypoint_id'].count(),
+        'Tối thiểu 3 cuộc gọi với thời gian đổ chuông >10s trong trường hợp khách không nghe máy': x[x['Tối thiểu 3 cuộc gọi với thời gian đổ chuông >10s trong trường hợp khách không nghe máy']==1]['waypoint_id'].count(),
+        'Thời gian giữa mỗi cuộc gọi tối thiểu 1p': x[x['Thời gian giữa mỗi cuộc gọi tối thiểu 1p']==1]['waypoint_id'].count(),
         'Thời gian gọi sớm hơn hoặc bằng thời gian xử lý thất bại': x[x['Thời gian gọi sớm hơn hoặc bằng thời gian xử lý thất bại']==1]['waypoint_id'].count(),
-        'Thời gian đổ chuông >10s trong trường hợp khách không nghe máy': x[x['Thời gian đổ chuông >10s trong trường hợp khách không nghe máy']==1]['waypoint_id'].count(),
-        'no_call_log_aloninja': x[x['no_call_log_aloninja']==1]['waypoint_id'].count(),
-        'No Record': x[x['No Record']==1]['waypoint_id'].count(),
+        'Không có cuộc gọi tiêu chuẩn': x[x['Không có cuộc gọi tiêu chuẩn']==1]['waypoint_id'].count(), 
+        'Không có cuộc gọi thành công': x[x['Không có cuộc gọi thành công']==1]['waypoint_id'].count(),
+        'Không có hình ảnh POD': x[x['Không có hình ảnh POD']==1]['waypoint_id'].count(),
+
 
         ## waypoint
         'total_attempt': x['waypoint_id'].count(),
