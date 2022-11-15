@@ -76,7 +76,7 @@ def read_folder_pod_resultQA_in_month(str_time_from, str_time_to):
   needed_df = source_df.loc[ (source_df.date >= pd.Timestamp(str_time_from)) & (source_df.date <= pd.Timestamp(str_time_to))] # select continually update date range
 
   # get data frame
-  dfs = []
+  big_frame = pd.DataFrame()
   print(needed_df['date'].unique())
   for filename in needed_df['filename']:
       renamed = pd.read_csv(filename).rename(columns={
