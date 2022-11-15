@@ -71,7 +71,7 @@ def read_folder_pod_resultQA_in_month(str_time_from, str_time_to):
   dfs = []
   print(needed_df['date'].unique())
   for filename in needed_df['filename']:
-      renamed = pre_processing(pd.read_csv(filename))
+      renamed = pre_processing(pd.read_csv(filename)).reset_index()
       print('Path File:{}, duplicated :{}'.format(filename, renamed[renamed['waypoint_id'].duplicated()].shape))
 
       dfs.append(renamed)
