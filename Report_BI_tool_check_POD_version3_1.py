@@ -76,6 +76,7 @@ def read_folder_pod_resultQA_in_month(str_time_from, str_time_to):
 
       dfs.append(renamed)
   big_frame = dfs.reset_index()
+  big_frame.info()
   return big_frame
 
 # Phase 2: pre-processing, dispute
