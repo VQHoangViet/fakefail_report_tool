@@ -86,7 +86,8 @@ def driver_finder(x):
 
 def pre_processing(x):
     # save version data:
-    
+    x['no_call_log_aloninja'] = 0
+    x.loc[x['call_log_count']==0, 'no_call_log_aloninja'] = 1
     x.drop(columns=['Unnamed: 0', 'mass_down_server', 'disputing', 'Cuộc gọi phải phát sinh trước 8PM'], inplace=True, errors='ignore')
     x.rename(columns={
       'Thời gian ghi nhận fail attempt phải trước 10PM':'Fail attempt sau 10PM',
@@ -94,6 +95,7 @@ def pre_processing(x):
       'Thời gian đổ chuông >10s trong trường hợp khách không nghe máy':'Tối thiểu 3 cuộc gọi với thời gian đổ chuông >10s trong trường hợp khách không nghe máy',
       'Thời gian giữa mỗi cuộc gọi tối thiểu 1 phút':'Thời gian giữa mỗi cuộc gọi tối thiểu 1p',
       'No Record':'Không có cuộc gọi thành công',
+      'no_call_log_aloninja':'Không có cuộc gọi tiêu chuẩn',
     }, errors='ignore', inplace=True)
     print('#1')
     x.attempt_datetime = pd.to_datetime(x.attempt_datetime)
@@ -108,12 +110,12 @@ def pre_processing(x):
       'Thời gian giữa mỗi cuộc gọi tối thiểu 1p',
       'Thời gian gọi sớm hơn hoặc bằng thời gian xử lý thất bại',
       'Tối thiểu 3 cuộc gọi với thời gian đổ chuông >10s trong trường hợp khách không nghe máy' ,
-      'Không có cuộc gọi thành công', 'Không có cuộc gọi tiêu chuẩn', 'Không có hình ảnh POD']] = x[['reason_no' , 'Fail attempt sau 10PM' ,
+      'Không có cuộc gọi thành công', 'Không có cuộc gọi tiêu chuẩn']] = x[['reason_no' , 'Fail attempt sau 10PM' ,
       'Lịch sử tối thiểu 3 cuộc gọi ra',
       'Thời gian giữa mỗi cuộc gọi tối thiểu 1p',
       'Thời gian gọi sớm hơn hoặc bằng thời gian xử lý thất bại',
       'Tối thiểu 3 cuộc gọi với thời gian đổ chuông >10s trong trường hợp khách không nghe máy' ,
-      'Không có cuộc gọi thành công', 'Không có cuộc gọi tiêu chuẩn', 'Không có hình ảnh POD']].replace('-', 0).astype('float64')
+      'Không có cuộc gọi thành công', 'Không có cuộc gọi tiêu chuẩn']].replace('-', 0).astype('float64')
    
     # dropna columns 
     print('#3')
