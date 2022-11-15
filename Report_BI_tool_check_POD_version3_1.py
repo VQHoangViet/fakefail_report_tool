@@ -79,9 +79,16 @@ def read_folder_pod_resultQA_in_month(str_time_from, str_time_to):
   dfs = []
   print(needed_df['date'].unique())
   for filename in needed_df['filename']:
-      x = pd.read_csv(filename)
+      renamed = pd.read_csv(filename).rename(columns={
+        'Thời gian ghi nhận fail attempt phải trước 10PM':'Fail attempt sau 10PM',
+        'Lịch sử tối thiểu 3 cuộc gọi':'Lịch sử tối thiểu 3 cuộc gọi ra',
+        'Thời gian đổ chuông >10s trong trường hợp khách không nghe máy':'Tối thiểu 3 cuộc gọi với thời gian đổ chuông >10s trong trường hợp khách không nghe máy',
+        'Thời gian giữa mỗi cuộc gọi tối thiểu 1 phút':'Thời gian giữa mỗi cuộc gọi tối thiểu 1p',
+        'No Record':'Không có cuộc gọi thành công',
+      }, errors='ignore')
+      new = renamed.drop(columns=['Cuộc gọi phải phát sinh trước 8PM'], errors='ignore')
       print('Path File:{}, duplicated :{}'.format(filename, x[x['waypoint_id'].duplicated()].shape))
-      dfs.append(x)
+      dfs.append(new)
   big_frame = pd.concat(dfs, ignore_index=False)  # Concatenate all data into one DataFram
   print(big_frame.shape)
   print(big_frame.info())
