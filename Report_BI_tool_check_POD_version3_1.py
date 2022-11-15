@@ -87,7 +87,7 @@ def read_folder_pod_resultQA_in_month(str_time_from, str_time_to):
         'No Record':'Không có cuộc gọi thành công',
       }, errors='ignore')
       new = renamed.drop(columns=['Cuộc gọi phải phát sinh trước 8PM'], errors='ignore')
-      print('Path File:{}, duplicated :{}'.format(filename, x[x['waypoint_id'].duplicated()].shape))
+      print('Path File:{}, duplicated :{}'.format(filename, new[new['waypoint_id'].duplicated()].shape))
       dfs.append(new)
   big_frame = pd.concat(dfs, ignore_index=False)  # Concatenate all data into one DataFram
   print(big_frame.shape)
