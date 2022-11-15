@@ -51,6 +51,15 @@ def reading_last_7_day():
     test = pd.read_csv('https://docs.google.com/spreadsheets/d/' + 
                     str(i.split("d/")[1].split("/e")[0]) +
                   '/export?gid=0&format=csv').drop_duplicates(subset=['order_id', 'waypoint_id'], keep='last')
+    test = test.rename(columns={
+        'Thời gian ghi nhận fail attempt phải trước 10PM':'Fail attempt sau 10PM',
+        'Lịch sử tối thiểu 3 cuộc gọi':'Lịch sử tối thiểu 3 cuộc gọi ra',
+        'Thời gian đổ chuông >10s trong trường hợp khách không nghe máy':'Tối thiểu 3 cuộc gọi với thời gian đổ chuông >10s trong trường hợp khách không nghe máy',
+        'Thời gian giữa mỗi cuộc gọi tối thiểu 1 phút':'Thời gian giữa mỗi cuộc gọi tối thiểu 1p',
+        'No Record':'Không có cuộc gọi thành công',
+    })
+    test = test.drop(columns=['Cuộc gọi phải phát sinh trước 8PM'])
+
 
     test.to_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/Report BI Tool/Pre_processed data/{}.csv'.format(test['attempt_date'].unique()[0]), index=False)
     print('Done File: {}'.format(test['attempt_date'].unique()[0]))
