@@ -317,6 +317,15 @@ def export_final_driver_file(final):
   except:
     final.to_csv('/content/DB_final_driver_data '+ str((pd.to_datetime(final['first_attempt_date']).dt.year.max())) + "_" + str(pd.to_datetime(final['first_attempt_date']).dt.month.max()) +'.csv', index = False)
 
+def export_final_reason_file(x):
+  print('Reason fail: start!')
+  reason = pd.read_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/final_data_monthly/reason_fail_agg.csv')
+  x = pd.concat([reason, x]).drop_duplicates(subset=['first_attempt_date', 'reason'],keep='last')
+  x.sort_values('first_attempt_date').to_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/final_data_monthly/reason_fail_agg.csv', index=False)
+  print('Reason fail: end!')
+
+  return x
+
 
 
 ### ___________________________________________________ Main ____________________________________________________________  
@@ -354,7 +363,7 @@ def read_pipeline(url_agg:str, str_time_from_:str, str_time_to_:str, split_from_
   print('Phase 3: Mapping' + '-'*100)
   driver = mapping_phase(df, url_agg)
   reason = df.groupby(['first_attempt_date', 'reason']).apply(reason_fail_agg).reset_index()
-  reason.sort_values('first_attempt_date').to_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/final_data_monthly/reason_fail_agg.csv', index=False)
+  reason = export_final_reason_file(reason)
   # compute phase
   clear_output()
   print('Final: ' + '-'*100)
