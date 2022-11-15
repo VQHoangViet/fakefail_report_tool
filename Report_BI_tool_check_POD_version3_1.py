@@ -58,7 +58,7 @@ def reading_last_7_day():
         'Thời gian giữa mỗi cuộc gọi tối thiểu 1 phút':'Thời gian giữa mỗi cuộc gọi tối thiểu 1p',
         'No Record':'Không có cuộc gọi thành công',
     }, errors='ignore')
-    test = test.drop(columns=['Cuộc gọi phải phát sinh trước 8PM'])
+    test = test.drop(columns=['Cuộc gọi phải phát sinh trước 8PM'], errors='ignore')
 
 
     test.to_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/Report BI Tool/Pre_processed data/{}.csv'.format(test['attempt_date'].unique()[0]), index=False)
