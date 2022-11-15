@@ -76,7 +76,7 @@ def read_folder_pod_resultQA_in_month(str_time_from, str_time_to):
   needed_df = source_df.loc[ (source_df.date >= pd.Timestamp(str_time_from)) & (source_df.date <= pd.Timestamp(str_time_to))] # select continually update date range
 
   # get data frame
-  big_frame = pd.DataFrame()
+  dfs = []
   print(needed_df['date'].unique())
   for filename in needed_df['filename']:
       renamed = pd.read_csv(filename).rename(columns={
@@ -87,7 +87,10 @@ def read_folder_pod_resultQA_in_month(str_time_from, str_time_to):
         'No Record':'Không có cuộc gọi thành công',
       }, errors='ignore').drop(columns=['Cuộc gọi phải phát sinh trước 8PM'], errors='ignore')
       print('Path File:{}, duplicated :{}'.format(filename, renamed[renamed['waypoint_id'].duplicated()].shape))
-      big_frame = pd.concat([big_frame.reset_index(drop=True), renamed.reset_index(drop=True)], ignore_index=True)
+      dfs.append(renamed)
+
+  dfs.reset_index(drop=True, inplace=True)
+  big_frame = pd.concat([dfs], ignore_index=True)
    # Concatenate all data into one DataFram
   print(big_frame.shape)
   print(big_frame.info())
