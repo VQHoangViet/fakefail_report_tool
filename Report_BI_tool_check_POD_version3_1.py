@@ -221,6 +221,27 @@ def sales_channel(x):
 
 
 # Phase 3: grouping
+def reason_fail_agg(x):
+    names = {
+        'total_attempt': x['waypoint_id'].nunique(),
+        'BI_FakeFail': x[x['result']=='fake_fail']['waypoint_id'].nunique(),
+        'BI_FakeFail_order_count': x[x['result']=='fake_fail']['order_id'].nunique(),
+
+        ## Updated on 27/09/2022 (starting time on data is 19/09/2022)
+        'freelancer_FF_attempt' : x[(x['driver_type']=='freelancer') & (x['result']=='fake_fail')]['waypoint_id'].nunique(),
+        'fulltime_FF_attempt' : x[(x['driver_type']=='fulltime') & (x['result']=='fake_fail')]['waypoint_id'].nunique(),
+        '3PL_FF_attempt' : x[(x['driver_type']=='3PLs') & (x['result']=='fake_fail')]['waypoint_id'].nunique(),
+        'others_FF_attempt' : x[(x['driver_type']=='others') & (x['result']=='fake_fail')]['waypoint_id'].nunique(),
+        ##
+        'freelancer_FF_orders' : x[(x['driver_type']=='freelancer') & (x['result']=='fake_fail')]['order_id'].nunique(),
+        'fulltime_FF_orders' : x[(x['driver_type']=='fulltime') & (x['result']=='fake_fail')]['order_id'].nunique(),
+        '3PL_FF_orders' : x[(x['driver_type']=='3PLs') & (x['result']=='fake_fail')]['order_id'].nunique(),
+        'others_FF_orders' : x[(x['driver_type']=='others') & (x['result']=='fake_fail')]['order_id'].nunique()
+        ##
+    }
+    return pd.Series(names)
+
+
 def bi_agg(x):
     names = {
         # note: count by attempt         # 'Cuộc gọi phải phát sinh trước 8PM': x[x['Cuộc gọi phải phát sinh trước 8PM']==1]['waypoint_id'].count(), (đã bị loại bỏ vào ngày 14/11/2022)
@@ -240,6 +261,7 @@ def bi_agg(x):
         'attempt_fake_fail_list': set(x[x['result']=='fake_fail']['waypoint_id']),
         'correted_by_disputing_attempt':  x[(x['corrected_dispute']==0) & (x['result']=='fake_fail')]['waypoint_id'].nunique(),
         'total_attempt_affected_by_mass_bug': x[(x['affected_by_mass_bug']==1) & (x['result']=='fake_fail')]['waypoint_id'].nunique(),
+        'total_attempt_affected_by_discreting_bug': x[(x['affected_by_discreting_bug']==1) & (x['result']=='fake_fail')]['waypoint_id'].nunique(),
         'final_disputation_attempt':  x[(x['corrected_dispute']==0) & (x['result']=='fake_fail')]['waypoint_id'].nunique(),
 
 
@@ -252,6 +274,8 @@ def bi_agg(x):
         'Final_Fake_fail_tracking_id_list': x[(x['final_result']==1)]['tracking_id'].unique()
         }
     return pd.Series(names)
+
+
 
 # Phase 4: get vol_of_ontime_KPI
 
@@ -329,11 +353,11 @@ def read_pipeline(url_agg:str, str_time_from_:str, str_time_to_:str, split_from_
   print(df.info())
   print('Phase 3: Mapping' + '-'*100)
   driver = mapping_phase(df, url_agg)
-
-
+  reason = df.groupby(['first_attempt_date', 'reason']).apply(reason_fail_agg).reset_index()
+  reason.sort_values('first_attempt_date').to_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/final_data_monthly/reason_fail_agg.csv', index=False)
   # compute phase
   clear_output()
   print('Final: ' + '-'*100)
   final = compute_phase(driver)
   export_final_driver_file(final)
-  return df, final
+  return df, final, reason
