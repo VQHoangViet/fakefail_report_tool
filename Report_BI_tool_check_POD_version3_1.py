@@ -68,14 +68,14 @@ def read_folder_pod_resultQA_in_month(str_time_from, str_time_to):
   needed_df = source_df.loc[ (source_df.date >= pd.Timestamp(str_time_from)) & (source_df.date <= pd.Timestamp(str_time_to))] # select continually update date range
 
   # get data frame
-  dfs = []
+  dfs = pd.DataFrame()
   print(needed_df['date'].unique())
   for filename in needed_df['filename']:
-      renamed = pre_processing(pd.read_csv(filename)).reset_index()
+      renamed = pre_processing(pd.read_csv(filename))
       print('Path File:{}, duplicated :{}'.format(filename, renamed[renamed['waypoint_id'].duplicated()].shape))
 
       dfs.append(renamed)
-  big_frame = pd.concat(dfs, ignore_index=True)
+  big_frame = dfs.reset_index()
   return big_frame
 
 # Phase 2: pre-processing, dispute
