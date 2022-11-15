@@ -57,7 +57,7 @@ def reading_last_7_day():
         'Thời gian đổ chuông >10s trong trường hợp khách không nghe máy':'Tối thiểu 3 cuộc gọi với thời gian đổ chuông >10s trong trường hợp khách không nghe máy',
         'Thời gian giữa mỗi cuộc gọi tối thiểu 1 phút':'Thời gian giữa mỗi cuộc gọi tối thiểu 1p',
         'No Record':'Không có cuộc gọi thành công',
-    })
+    }, errors='ignore')
     test = test.drop(columns=['Cuộc gọi phải phát sinh trước 8PM'])
 
 
