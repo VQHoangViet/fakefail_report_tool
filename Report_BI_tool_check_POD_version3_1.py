@@ -87,7 +87,7 @@ def driver_finder(x):
 def pre_processing(x):
     # save version data:
     x['no_call_log_aloninja'] = 0
-    x.loc[x['call_log_count']==0, 'no_call_log_aloninja'] = 1
+    x.loc[x['count_call_log']==0, 'no_call_log_aloninja'] = 1
     x.drop(columns=['Unnamed: 0', 'mass_down_server', 'disputing', 'Cuộc gọi phải phát sinh trước 8PM'], inplace=True, errors='ignore')
     x.rename(columns={
       'Thời gian ghi nhận fail attempt phải trước 10PM':'Fail attempt sau 10PM',
