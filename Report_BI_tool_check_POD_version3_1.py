@@ -86,19 +86,15 @@ def driver_finder(x):
 
 def pre_processing(x):
     # save version data:
-
-    try:
-      x.drop(columns=['Unnamed: 0', 'mass_down_server', 'disputing', 'Cuộc gọi phải phát sinh trước 8PM'], inplace=True, errors='ignore')
-      x.rename(columns={
-        'Thời gian ghi nhận fail attempt phải trước 10PM':'Fail attempt sau 10PM',
-        'Lịch sử tối thiểu 3 cuộc gọi':'Lịch sử tối thiểu 3 cuộc gọi ra',
-        'Thời gian đổ chuông >10s trong trường hợp khách không nghe máy':'Tối thiểu 3 cuộc gọi với thời gian đổ chuông >10s trong trường hợp khách không nghe máy',
-        'Thời gian giữa mỗi cuộc gọi tối thiểu 1 phút':'Thời gian giữa mỗi cuộc gọi tối thiểu 1p',
-        'No Record':'Không có cuộc gọi thành công',
+    
+    x.drop(columns=['Unnamed: 0', 'mass_down_server', 'disputing', 'Cuộc gọi phải phát sinh trước 8PM'], inplace=True, errors='ignore')
+    x.rename(columns={
+      'Thời gian ghi nhận fail attempt phải trước 10PM':'Fail attempt sau 10PM',
+      'Lịch sử tối thiểu 3 cuộc gọi':'Lịch sử tối thiểu 3 cuộc gọi ra',
+      'Thời gian đổ chuông >10s trong trường hợp khách không nghe máy':'Tối thiểu 3 cuộc gọi với thời gian đổ chuông >10s trong trường hợp khách không nghe máy',
+      'Thời gian giữa mỗi cuộc gọi tối thiểu 1 phút':'Thời gian giữa mỗi cuộc gọi tối thiểu 1p',
+      'No Record':'Không có cuộc gọi thành công',
     }, errors='ignore', inplace=True)
-
-    except:
-      pass
     print('#1')
     x.attempt_datetime = pd.to_datetime(x.attempt_datetime)
     # notice: no_call_log_aloninja = fakefail (update: 30/09/2022)
