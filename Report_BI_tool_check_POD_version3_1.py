@@ -91,7 +91,7 @@ def read_folder_pod_resultQA_in_month(str_time_from, str_time_to):
       dfs.append(renamed)
 
   
-  big_frame = pd.concat([dfs], ignore_index=True)
+  big_frame = pd.concat(dfs, ignore_index=True)
    # Concatenate all data into one DataFram
   print(big_frame.shape)
   print(big_frame.info())
