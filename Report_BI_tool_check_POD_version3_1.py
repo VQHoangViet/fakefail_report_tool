@@ -51,21 +51,13 @@ def reading_last_7_day():
     test = pd.read_csv('https://docs.google.com/spreadsheets/d/' + 
                     str(i.split("d/")[1].split("/e")[0]) +
                   '/export?gid=0&format=csv').drop_duplicates(subset=['order_id', 'waypoint_id'], keep='last')
-    renamed = test.rename(columns={
-        'Thời gian ghi nhận fail attempt phải trước 10PM':'Fail attempt sau 10PM',
-        'Lịch sử tối thiểu 3 cuộc gọi':'Lịch sử tối thiểu 3 cuộc gọi ra',
-        'Thời gian đổ chuông >10s trong trường hợp khách không nghe máy':'Tối thiểu 3 cuộc gọi với thời gian đổ chuông >10s trong trường hợp khách không nghe máy',
-        'Thời gian giữa mỗi cuộc gọi tối thiểu 1 phút':'Thời gian giữa mỗi cuộc gọi tối thiểu 1p',
-        'No Record':'Không có cuộc gọi thành công',
-    }, errors='ignore')
-    new = renamed.drop(columns=['Cuộc gọi phải phát sinh trước 8PM'], errors='ignore')
-
-
+    new = pre_processing(test)
     new.to_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/Report BI Tool/Pre_processed data/{}.csv'.format(new['attempt_date'].unique()[0]), index=False)
     print('Done File: {}'.format(new['attempt_date'].unique()[0]))
   
 
 def read_folder_pod_resultQA_in_month(str_time_from, str_time_to):
+  reading_last_7_day()
   # Get data file names
   mypath = '/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/Report BI Tool/Pre_processed data/'
   source_df = pd.DataFrame({
@@ -79,23 +71,10 @@ def read_folder_pod_resultQA_in_month(str_time_from, str_time_to):
   dfs = []
   print(needed_df['date'].unique())
   for filename in needed_df['filename']:
-      renamed = pd.read_csv(filename).rename(columns={
-        'Thời gian ghi nhận fail attempt phải trước 10PM':'Fail attempt sau 10PM',
-        'Lịch sử tối thiểu 3 cuộc gọi':'Lịch sử tối thiểu 3 cuộc gọi ra',
-        'Thời gian đổ chuông >10s trong trường hợp khách không nghe máy':'Tối thiểu 3 cuộc gọi với thời gian đổ chuông >10s trong trường hợp khách không nghe máy',
-        'Thời gian giữa mỗi cuộc gọi tối thiểu 1 phút':'Thời gian giữa mỗi cuộc gọi tối thiểu 1p',
-        'No Record':'Không có cuộc gọi thành công',
-      }, errors='ignore').drop(columns=['Cuộc gọi phải phát sinh trước 8PM'], errors='ignore')
       print('Path File:{}, duplicated :{}'.format(filename, renamed[renamed['waypoint_id'].duplicated()].shape))
-      renamed.reset_index(drop=True, inplace=True)
+      renamed = pre_processing(pd.read_csv(filename))
       dfs.append(renamed)
-
-  
   big_frame = pd.concat(dfs, ignore_index=True)
-   # Concatenate all data into one DataFram
-  print(big_frame.shape)
-  print(big_frame.info())
-
   return big_frame
 
 # Phase 2: pre-processing, dispute
@@ -107,10 +86,17 @@ def driver_finder(x):
 
 def pre_processing(x):
     # save version data:
-    x['no_call_log_aloninja'] = 0
 
     try:
-      x.drop(columns=['Unnamed: 0', 'mass_down_server', 'disputing', 'Cuộc gọi phải phát sinh trước 8PM'], inplace=True)
+      x.drop(columns=['Unnamed: 0', 'mass_down_server', 'disputing', 'Cuộc gọi phải phát sinh trước 8PM'], inplace=True, errors='ignore')
+      x.rename(columns={
+        'Thời gian ghi nhận fail attempt phải trước 10PM':'Fail attempt sau 10PM',
+        'Lịch sử tối thiểu 3 cuộc gọi':'Lịch sử tối thiểu 3 cuộc gọi ra',
+        'Thời gian đổ chuông >10s trong trường hợp khách không nghe máy':'Tối thiểu 3 cuộc gọi với thời gian đổ chuông >10s trong trường hợp khách không nghe máy',
+        'Thời gian giữa mỗi cuộc gọi tối thiểu 1 phút':'Thời gian giữa mỗi cuộc gọi tối thiểu 1p',
+        'No Record':'Không có cuộc gọi thành công',
+    }, errors='ignore', inplace=True)
+
     except:
       pass
     print('#1')
@@ -146,15 +132,12 @@ def pre_processing(x):
     # drop dupli waypoint_id AND tracking_id
     # bug: drop được duplicate nhưng bị mất FF attempt nếu nằm ở đầu (fixed)
     x = x.sort_values(['attempt_datetime'])
+    x = x.drop_duplicates(subset=['order_id','waypoint_id'], keep='last')
     print('#6')
 
     # find driver type
     x['driver_type'] =  x.driver_name.apply(driver_finder)
     x =  x.dropna(how='all', axis=1).dropna(how='all', axis=0)
-
-    print('#7')
-
-    x = get_first_attempt_date(x) ## 11/03/2022: get first attempt to mapping
 
     print('#end')
 
@@ -364,7 +347,8 @@ def read_pipeline(url_agg:str, str_time_from_:str, str_time_to_:str, split_from_
   # reading and preprecessing
   print('Phase 1: Reading Data and preprocessing' + '-'*100)
   big_frame = read_folder_pod_resultQA_in_month(str_time_from_, str_time_to_)
-  df = pre_processing(big_frame.loc[(pd.to_datetime(big_frame['attempt_date']) >= pd.Timestamp(str_time_from_)) & (pd.to_datetime(big_frame['attempt_date']) <= pd.Timestamp(str_time_to_))])
+  df = big_frame.loc[(pd.to_datetime(big_frame['attempt_date']) >= pd.Timestamp(str_time_from_)) & (pd.to_datetime(big_frame['attempt_date']) <= pd.Timestamp(str_time_to_))]
+  df = get_first_attempt_date(df) ## 11/03/2022: get first attempt to mapping
 
 
   # dispute
