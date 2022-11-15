@@ -85,10 +85,9 @@ def read_folder_pod_resultQA_in_month(str_time_from, str_time_to):
         'Thời gian đổ chuông >10s trong trường hợp khách không nghe máy':'Tối thiểu 3 cuộc gọi với thời gian đổ chuông >10s trong trường hợp khách không nghe máy',
         'Thời gian giữa mỗi cuộc gọi tối thiểu 1 phút':'Thời gian giữa mỗi cuộc gọi tối thiểu 1p',
         'No Record':'Không có cuộc gọi thành công',
-      }, errors='ignore')
-      new = renamed.drop(columns=['Cuộc gọi phải phát sinh trước 8PM'], errors='ignore')
+      }, errors='ignore').drop(columns=['Cuộc gọi phải phát sinh trước 8PM'], errors='ignore')
       print('Path File:{}, duplicated :{}'.format(filename, new[new['waypoint_id'].duplicated()].shape))
-      big_frame = pd.concat([big_frame, new], ignore_index=True)
+      big_frame = pd.concat([big_frame, renamed.reset_index()], ignore_index=True)
    # Concatenate all data into one DataFram
   print(big_frame.shape)
   print(big_frame.info())
