@@ -87,7 +87,7 @@ def read_folder_pod_resultQA_in_month(str_time_from, str_time_to):
         'No Record':'Không có cuộc gọi thành công',
       }, errors='ignore').drop(columns=['Cuộc gọi phải phát sinh trước 8PM'], errors='ignore')
       print('Path File:{}, duplicated :{}'.format(filename, renamed[renamed['waypoint_id'].duplicated()].shape))
-      big_frame = pd.concat([big_frame, renamed.reset_index()], ignore_index=True)
+      big_frame = pd.concat([big_frame.reset_index(), renamed.reset_index()], ignore_index=True)
    # Concatenate all data into one DataFram
   print(big_frame.shape)
   print(big_frame.info())
@@ -359,7 +359,6 @@ def read_pipeline(url_agg:str, str_time_from_:str, str_time_to_:str, split_from_
 
   # reading and preprecessing
   print('Phase 1: Reading Data and preprocessing' + '-'*100)
-  reading_last_7_day()
   big_frame = read_folder_pod_resultQA_in_month(str_time_from_, str_time_to_)
   df = pre_processing(big_frame.loc[(pd.to_datetime(big_frame['attempt_date']) >= pd.Timestamp(str_time_from_)) & (pd.to_datetime(big_frame['attempt_date']) <= pd.Timestamp(str_time_to_))])
 
