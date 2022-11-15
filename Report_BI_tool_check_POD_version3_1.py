@@ -146,6 +146,7 @@ def get_disputetime():
 
 def final_dispute(x):
   ## Disputing
+  x['disputing'] = 0
   x['attempt_datetime'] = pd.to_datetime(x['attempt_datetime'])
   x['final_result'] = 0
   x['corrected_dispute'] = 0
@@ -171,11 +172,13 @@ def final_dispute(x):
   accepted_waypoint = disputing[disputing['Status'].isin(['Corrected', 'Product xin loại trừ', 'no'])]
   
   x.loc[x['waypoint_id'].isin(accepted_waypoint['waypoint_id']), 'corrected_dispute'] = 1
+  x.loc[x['waypoint_id'].isin(disputing['waypoint_id']), 'disputing'] = 1
+
 
   ### Mass bug
   # Lỗi sever 
-  x.loc[(x.attempt_datetime >= pd.Timestamp(2022, 9, 28, 12, 00)) & (x.attempt_datetime <= pd.Timestamp(2022, 9, 29, 23, 59)),'affected_by_mass_bug'] = 1
-  x.loc[(x.attempt_datetime >= pd.Timestamp(2022, 10, 5, 16, 30)) & (x.attempt_datetime <= pd.Timestamp(2022, 10, 5, 23, 59)),'affected_by_mass_bug'] = 1
+  x.loc[(x.attempt_datetime >= pd.Timestamp(2022, 9, 28, 12, 00)) & (x.attempt_datetime <= pd.Timestamp(2022, 9, 29, 23, 59)),'affected_by_mass_bug','disputing'] = 1
+  x.loc[(x.attempt_datetime >= pd.Timestamp(2022, 10, 5, 16, 30)) & (x.attempt_datetime <= pd.Timestamp(2022, 10, 5, 23, 59)),'affected_by_mass_bug','disputing'] = 1
   
   # Lỗi sever: Các đầu số Mobi của khách hàng không thể gọi đc callee == *đầu số mobi* từ 6h00 24/10/2022 -> 23h59 cùng ngày
   mobi_ = ['90' , '93' , '89' ,  '70',	'79',	'77',	'76',	'78']
@@ -185,7 +188,7 @@ def final_dispute(x):
 
   x.loc[(  ( (x.attempt_datetime >= pd.Timestamp(2022, 10, 24, 6)) & (x.attempt_datetime <= pd.Timestamp(2022, 10, 24, 23, 59)) ) &
            (x['callee_'].isin(mobi_) | x['driver_contact_'].isin(mobi_))
-        ), 'affected_by_mass_bug'] = 1
+        ), 'affected_by_mass_bug', 'disputing'] = 1
   x = x.drop(columns=['callee_', 'driver_contact_'])
   # collecting tu form product:
   creds, _ = default()
@@ -193,7 +196,7 @@ def final_dispute(x):
   print('https://docs.google.com/spreadsheets/d/1TLprj6Z9eerZzhph1nf24hyrBz_ApRYHlXZpmGSauww/edit?usp=sharing')
   temp = gc.open_by_url('https://docs.google.com/spreadsheets/d/1TLprj6Z9eerZzhph1nf24hyrBz_ApRYHlXZpmGSauww/edit?usp=sharing').worksheet("Form Responses 1")
   tid_product_form = get_as_dataframe(temp, evaluate_formulas=True).dropna(how='all', axis=1).dropna(how='all', axis=0).drop_duplicates(subset=['Mã đơn hàng (TID)']).rename(columns={"Mã đơn hàng (TID)": 'tracking_id' })[['tracking_id', 'PDT confirm']]
-  x.loc[(x['tracking_id'].isin(tid_product_form.loc[tid_product_form['PDT confirm'] =='accept','tracking_id'])) & (x['tracking_id'].isin(x.loc[x['affected_by_mass_bug'] == 0,'tracking_id'])),'affected_by_discreting_bug'] = 1
+  x.loc[(x['tracking_id'].isin(tid_product_form.loc[tid_product_form['PDT confirm'] =='accept','tracking_id'])) & (x['tracking_id'].isin(x.loc[x['affected_by_mass_bug'] == 0,'tracking_id'])),'affected_by_discreting_bug', 'disputing'] = 1
   
 
   # final:
@@ -259,6 +262,7 @@ def bi_agg(x):
         'total_attempt': x['waypoint_id'].count(),
         'total_fake_fail_attempt': x.loc[x['result'] == 'fake_fail','waypoint_id'].count(),
         'attempt_fake_fail_list': set(x[x['result']=='fake_fail']['waypoint_id']),
+        'disputing_attempt':  x[(x['disputing']==1)]['waypoint_id'].nunique(),
         'correted_by_disputing_attempt':  x[(x['corrected_dispute']==0) & (x['result']=='fake_fail')]['waypoint_id'].nunique(),
         'total_attempt_affected_by_mass_bug': x[(x['affected_by_mass_bug']==1) & (x['result']=='fake_fail')]['waypoint_id'].nunique(),
         'total_attempt_affected_by_discreting_bug': x[(x['affected_by_discreting_bug']==1) & (x['result']=='fake_fail')]['waypoint_id'].nunique(),
@@ -268,8 +272,10 @@ def bi_agg(x):
         ## tracking id
         'total_orders': x['order_id'].nunique(),
         'total_fake_fail_orders': x[x['result']=='fake_fail']['order_id'].nunique(),
+        'disputing_attempt':  x[(x['disputing']==1)]['order_id'].nunique(),
         'correted_by_disputing_orders':  x[(x['corrected_dispute']==1) & (x['result']=='fake_fail')]['order_id'].nunique(),
-        'total_orders_affected_by_bug': x[(x['affected_by_discreting_bug']==1) & (x['affected_by_mass_bug']==1) & (x['result']=='fake_fail')]['order_id'].nunique(),
+        'total_orders_affected_by_mass_bug': x[(x['affected_by_mass_bug']==1) & (x['result']=='fake_fail')]['order_id'].nunique(),
+        'total_orders_affected_by_discreting_bug': x[(x['affected_by_discreting_bug']==1) & (x['result']=='fake_fail')]['order_id'].nunique(),
         'real_FF_orders': x[(x['final_result']==1)]['order_id'].nunique(),
         'Final_Fake_fail_tracking_id_list': x[(x['final_result']==1)]['tracking_id'].unique()
         }
