@@ -266,7 +266,7 @@ def bi_agg(x):
         ## tracking id
         'total_orders': x['order_id'].nunique(),
         'total_fake_fail_orders': x[x['result']=='fake_fail']['order_id'].nunique(),
-        'disputing_attempt':  x[(x['disputing']==1)]['order_id'].nunique(),
+        'disputing_orders':  x[(x['disputing']==1)]['order_id'].nunique(),
         'correted_by_disputing_orders':  x[(x['corrected_dispute']==1) & (x['result']=='fake_fail')]['order_id'].nunique(),
         'total_orders_affected_by_mass_bug': x[(x['affected_by_mass_bug']==1) & (x['result']=='fake_fail')]['order_id'].nunique(),
         'total_orders_affected_by_discreting_bug': x[(x['affected_by_discreting_bug']==1) & (x['result']=='fake_fail')]['order_id'].nunique(),
