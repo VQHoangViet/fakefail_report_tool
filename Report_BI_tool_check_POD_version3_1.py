@@ -89,10 +89,24 @@ def reading_last_7_day():
 def read_folder_pod_resultQA_in_month(str_time_from, str_time_to):
   # Get data file names
   mypath = '/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/Report BI Tool/Pre_processed data/'
-  source_df = pd.DataFrame({
-    'filename': [mypath + f for f in listdir(mypath) if (isfile(join(mypath, f)) & (os.path.splitext(os.path.basename(f))[1] == '.csv'))],
-    'date' : pd.to_datetime(pd.Series([item.replace(".csv", "") for item in [f for f in listdir(mypath) if (isfile(join(mypath, f)) & (os.path.splitext(os.path.basename(f))[1] == '.csv'))]]))
-  })
+  path = os.getcwd(mypath)
+  csv_files = glob.glob(os.path.join(path, "*.csv"))
+  
+  
+  # loop over the list of csv files
+  for f in csv_files:
+      
+    # read the csv file
+    df = pd.read_csv(f)
+      
+    # print the location and filename
+    print('Location:', f)
+    print('File Name:', f.split("\\")[-1])
+      
+    # print the content
+    print('Content:')
+    display(df)
+    print()
   print(source_df['date'])
   needed_df = source_df.loc[ (source_df.date >= pd.Timestamp(str_time_from)) & (source_df.date <= pd.Timestamp(str_time_to))] # select continually update date range
 
