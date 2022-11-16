@@ -47,14 +47,14 @@ def pre_processing(x):
         'Tối thiểu 3 cuộc gọi với thời gian đổ chuông >10s trong trường hợp khách không nghe máy',
         'Không có cuộc gọi thành công',
         'Không có cuộc gọi tiêu chuẩn',
-        ' Không có hình ảnh POD']] = x[['Fail attempt sau 10PM',
+        'Không có hình ảnh POD']] = x[['Fail attempt sau 10PM',
         'Lịch sử tối thiểu 3 cuộc gọi ra',
         'Thời gian giữa mỗi cuộc gọi tối thiểu 1p',
         'Thời gian gọi sớm hơn hoặc bằng thời gian xử lý thất bại',
         'Tối thiểu 3 cuộc gọi với thời gian đổ chuông >10s trong trường hợp khách không nghe máy',
         'Không có cuộc gọi thành công',
         'Không có cuộc gọi tiêu chuẩn',
-        ' Không có hình ảnh POD']].replace('-', 0).astype('float64')
+        'Không có hình ảnh POD']].replace('-', 0).astype('float64')
     x['attempt_datetime'] = pd.to_datetime(x['attempt_datetime'])
     x[['hub_id', 'order_id', 'waypoint_id']] = x[['hub_id', 'order_id', 'waypoint_id']].astype('int64')
     x['count_call_log'] = x['count_call_log'].fillna(0)
