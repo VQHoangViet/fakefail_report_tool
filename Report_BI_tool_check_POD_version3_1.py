@@ -190,8 +190,7 @@ def final_dispute(x):
 
   # disputing:
   x.loc[x['waypoint_id'].isin(disputing['waypoint_id']), 'disputing'] = 1
-  x.loc[x['affected_by_mass_bug'] == 1, 'disputing'] = 1
-  x.loc[x['affected_by_discreting_bug'] == 1, 'disputing'] = 1
+
 
   # final:
   print('Bug case: ', x[ (x['result'] == 'fake_fail') & (x['affected_by_discreting_bug'] == 0) & ((x['affected_by_mass_bug'] == 0) & (x['corrected_dispute'] == 0)) ].shape)
@@ -274,9 +273,6 @@ def bi_agg(x):
         'Final_Fake_fail_tracking_id_list': x[(x['final_result']==1)]['tracking_id'].unique()
         }
     return pd.Series(names)
-
-
-
 
 # Phase 5: mapping infor
 def mapping_phase(x, url):
