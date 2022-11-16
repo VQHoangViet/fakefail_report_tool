@@ -82,9 +82,25 @@ def reading_last_7_day():
     test = pd.read_csv('https://docs.google.com/spreadsheets/d/' + 
                     str(i.split("d/")[1].split("/e")[0]) +
                   '/export?gid=0&format=csv').drop_duplicates(subset=['order_id', 'waypoint_id'], keep='last')
+    if pd.to_datetime(test['attempt_date'].unique()[0]) <= pd.Timestamp('2022-11-11'):
+      test['no_call_log_aloninja'] = 0
+      test['Không có hình ảnh POD'] = 0
+
+      test.loc[test['count_call_log'] == 0, 'no_call_log_aloninja'] = 1
+      test.loc[test['pod_photo'] == 'no photo', 'Không có hình ảnh POD'] = 1
+      test = test.rename(columns={'Thời gian ghi nhận fail attempt phải trước 10PM' : 'Fail attempt sau 10PM',
+      'Lịch sử tối thiểu 3 cuộc gọi ': 'Lịch sử tối thiểu 3 cuộc gọi ra',
+      'Thời gian giữa mỗi cuộc gọi tối thiểu 1 phút' : 'Thời gian giữa mỗi cuộc gọi tối thiểu 1p',
+      'Thời gian đổ chuông >10s trong trường hợp khách không nghe máy' : 'Tối thiểu 3 cuộc gọi với thời gian đổ chuông >10s trong trường hợp khách không nghe máy',
+      'no_call_log_aloninja' : 'Không có cuộc gọi tiêu chuẩn',
+      'No Record' : 'Không có cuộc gọi thành công'}, errors='ignore').dropna(how='all', axis=1).drop(columns=['Unnamed: 0','Cuộc gọi phải phát sinh trước 8PM'], errors='ignore')
     test.to_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/Report BI Tool/Pre_processed data/{}.csv'.format(test['attempt_date'].unique()[0]), index=False)
     print('Done File: {}'.format(test['attempt_date'].unique()[0]))
-  
+
+   
+
+    
+      
 
 def read_folder_pod_resultQA_in_month(str_time_from, str_time_to):
   # Get data file names
@@ -302,7 +318,11 @@ def export_final_driver_file(final):
 
 def export_final_reason_file(x):
   print('Reason fail: start!')
-  reason = pd.read_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/final_data_monthly/reason_fail_agg.csv')
+
+  try:
+    reason = pd.read_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/final_data_monthly/reason_fail_agg.csv')
+  except:
+    reason = pd.DataFrame()
   x = pd.concat([reason, x]).drop_duplicates(subset=['first_attempt_date', 'reason'],keep='last')
   x.sort_values('first_attempt_date').to_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/final_data_monthly/reason_fail_agg.csv', index=False)
   print('Reason fail: end!')
