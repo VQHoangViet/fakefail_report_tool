@@ -83,7 +83,7 @@ def reading_last_7_day():
                     str(i.split("d/")[1].split("/e")[0]) +
                   '/export?gid=0&format=csv').drop_duplicates(subset=['order_id', 'waypoint_id'], keep='last')
     test.to_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/Report BI Tool/Pre_processed data/{}.csv'.format(test['attempt_date'].unique()[0]), index=False)
-    print('Done File: {}'.format(new['attempt_date'].unique()[0]))
+    print('Done File: {}'.format(test['attempt_date'].unique()[0]))
   
 
 def read_folder_pod_resultQA_in_month(str_time_from, str_time_to):
