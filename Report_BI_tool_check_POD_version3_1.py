@@ -82,8 +82,7 @@ def reading_last_7_day():
     test = pd.read_csv('https://docs.google.com/spreadsheets/d/' + 
                     str(i.split("d/")[1].split("/e")[0]) +
                   '/export?gid=0&format=csv').drop_duplicates(subset=['order_id', 'waypoint_id'], keep='last')
-    new = pre_processing(test)
-    new.to_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/Report BI Tool/Pre_processed data/{}.csv'.format(new['attempt_date'].unique()[0]), index=False)
+    test.to_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/Report BI Tool/Pre_processed data/{}.csv'.format(test['attempt_date'].unique()[0]), index=False)
     print('Done File: {}'.format(new['attempt_date'].unique()[0]))
   
 
