@@ -128,6 +128,7 @@ def final_dispute(x):
   x['affected_by_discreting_bug'] = 0
   url = [
     'https://docs.google.com/spreadsheets/d/1i1Rha9Qg1qZ9sGI0-ddX9QBlO6Jg9URy2tm62Fu3X20/edit#gid=1966091300',
+    'https://docs.google.com/spreadsheets/d/1I-Tejd6M-Cv1Suq6D-8tqowNrb0dPHcn/edit#gid=1518203630',
     'https://docs.google.com/spreadsheets/d/1P0ohdLCGGvk037IHEFeiGvvc7l2bku5HIYCSgLT4i4o/edit#gid=419800374'
   ]
 
@@ -342,8 +343,7 @@ def read_pipeline(url_agg:str, str_time_from_:str, str_time_to_:str, split_from_
   print(df.info())
   print('Phase 3: Mapping' + '-'*100)
   driver = mapping_phase(df, url_agg)
-  reason = df.groupby(['first_attempt_date', 'reason']).apply(reason_fail_agg).reset_index()
-  reason = export_final_reason_file(reason)
+  reason =  export_final_reason_file(df.groupby(['first_attempt_date', 'reason']).apply(reason_fail_agg).reset_index())
   # compute phase
   clear_output()
   print('Final: ' + '-'*100)
