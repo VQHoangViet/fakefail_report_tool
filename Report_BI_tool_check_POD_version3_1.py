@@ -33,6 +33,37 @@ def get_first_attempt_date(x):
   return x
 
 
+def pre_processing(x):
+    print('Preprocessing:...')
+    x.drop(columns=['Unnamed: 0',  'Cuộc gọi phải phát sinh trước 8PM', 'first_attempt_date'], inplace=True, errors='ignore')
+    x = x.sort_values(['attempt_datetime'])
+    x = x.dropna(how='all', axis=1).dropna(how='all', axis=0) 
+    x = x.drop_duplicates(subset=['order_id','waypoint_id'], keep='last')
+    x.attempt_datetime = pd.to_datetime(x.attempt_datetime)
+    x[['Fail attempt sau 10PM',
+        'Lịch sử tối thiểu 3 cuộc gọi ra',
+        'Thời gian giữa mỗi cuộc gọi tối thiểu 1p',
+        'Thời gian gọi sớm hơn hoặc bằng thời gian xử lý thất bại',
+        'Tối thiểu 3 cuộc gọi với thời gian đổ chuông >10s trong trường hợp khách không nghe máy',
+        'Không có cuộc gọi thành công',
+        'Không có cuộc gọi tiêu chuẩn',
+        ' Không có hình ảnh POD']] = x[['Fail attempt sau 10PM',
+        'Lịch sử tối thiểu 3 cuộc gọi ra',
+        'Thời gian giữa mỗi cuộc gọi tối thiểu 1p',
+        'Thời gian gọi sớm hơn hoặc bằng thời gian xử lý thất bại',
+        'Tối thiểu 3 cuộc gọi với thời gian đổ chuông >10s trong trường hợp khách không nghe máy',
+        'Không có cuộc gọi thành công',
+        'Không có cuộc gọi tiêu chuẩn',
+        ' Không có hình ảnh POD']].replace('-', 0).astype('float64')
+    x['attempt_datetime'] = pd.to_datetime(x['attempt_datetime'])
+    x[['hub_id', 'order_id', 'waypoint_id']] = x[['hub_id', 'order_id', 'waypoint_id']].astype('int64')
+    x['count_call_log'] = x['count_call_log'].fillna(0)
+    x['driver_type'] =  x.driver_name.apply(driver_finder)
+    x =  x.dropna(how='all', axis=1).dropna(how='all', axis=0)
+    df = get_first_attempt_date(df)
+    print('#end')
+    return x
+
 
 # Phase1: reading data
 def reading_last_7_day():
@@ -57,7 +88,6 @@ def reading_last_7_day():
   
 
 def read_folder_pod_resultQA_in_month(str_time_from, str_time_to):
-  reading_last_7_day()
   # Get data file names
   mypath = '/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/Report BI Tool/Pre_processed data/'
   source_df = pd.DataFrame({
@@ -68,14 +98,13 @@ def read_folder_pod_resultQA_in_month(str_time_from, str_time_to):
   needed_df = source_df.loc[ (source_df.date >= pd.Timestamp(str_time_from)) & (source_df.date <= pd.Timestamp(str_time_to))] # select continually update date range
 
   # get data frame
-  dfs = pd.DataFrame()
+  dfs = []
   print(needed_df['date'].unique())
   for filename in needed_df['filename']:
-      renamed = pre_processing(pd.read_csv(filename))
+      renamed = pd.read_csv(filename)
       print('Path File:{}, duplicated :{}'.format(filename, renamed[renamed['waypoint_id'].duplicated()].shape))
-
       dfs.append(renamed)
-  big_frame = dfs.reset_index()
+  big_frame = pd.concat(dfs, ignore_index=True)
   big_frame.info()
   return big_frame
 
@@ -85,52 +114,6 @@ def driver_finder(x):
     elif 'FRLA' in x: return 'freelancer'
     elif( 'FTS' in x) | ('AGAR' in x) | ('189-FRLA' in x) | ('518-FRLA' in x) | ('XDOCT' in x) | ('TSS' in x) | ('GRAB' in x) | ('RAGA' in x) |('AHA' in x) : return '3PLs'
     else: return 'others'
-
-def pre_processing(x):
-    # save version data:
-    x['no_call_log_aloninja'] = 0
-    x.loc[x['count_call_log']==0, 'no_call_log_aloninja'] = 1
-    x.drop(columns=['Unnamed: 0', 'mass_down_server', 'disputing', 'Cuộc gọi phải phát sinh trước 8PM'], inplace=True, errors='ignore')
-    x.rename(columns={
-      'Thời gian ghi nhận fail attempt phải trước 10PM':'Fail attempt sau 10PM',
-      'Lịch sử tối thiểu 3 cuộc gọi':'Lịch sử tối thiểu 3 cuộc gọi ra',
-      'Thời gian đổ chuông >10s trong trường hợp khách không nghe máy':'Tối thiểu 3 cuộc gọi với thời gian đổ chuông >10s trong trường hợp khách không nghe máy',
-      'Thời gian giữa mỗi cuộc gọi tối thiểu 1 phút':'Thời gian giữa mỗi cuộc gọi tối thiểu 1p',
-      'No Record':'Không có cuộc gọi thành công',
-      'no_call_log_aloninja':'Không có cuộc gọi tiêu chuẩn',
-    }, errors='ignore', inplace=True)
-    print('#1')
-    x.attempt_datetime = pd.to_datetime(x.attempt_datetime)
-    # notice: no_call_log_aloninja = fakefail (update: 30/09/2022)
-
-    print('#2')
-    # CONVERT data_type
-    x['attempt_datetime'] = pd.to_datetime(x['attempt_datetime'])
-    x[['hub_id', 'order_id', 'waypoint_id']] = x[['hub_id', 'order_id', 'waypoint_id']].astype('int64')
-   
-    # dropna columns 
-    print('#3')
- 
-    x = x.dropna(how='all', axis=1).dropna(how='all', axis=0)   
-    print('#4')
-
-    # fill na to zero
-    x['count_call_log'] = x['count_call_log'].fillna(0)
-    print('#5')
-
-    # drop dupli waypoint_id AND tracking_id
-    # bug: drop được duplicate nhưng bị mất FF attempt nếu nằm ở đầu (fixed)
-    x = x.sort_values(['attempt_datetime'])
-    x = x.drop_duplicates(subset=['order_id','waypoint_id'], keep='last')
-    print('#6')
-
-    # find driver type
-    x['driver_type'] =  x.driver_name.apply(driver_finder)
-    x =  x.dropna(how='all', axis=1).dropna(how='all', axis=0)
-
-    print('#end')
-
-    return x
 
 def get_disputetime():
     return (dt.datetime.now() - dt.timedelta(days=5)).date()
@@ -243,14 +226,14 @@ def reason_fail_agg(x):
 def bi_agg(x):
     names = {
         # note: count by attempt         # 'Cuộc gọi phải phát sinh trước 8PM': x[x['Cuộc gọi phải phát sinh trước 8PM']==1]['waypoint_id'].count(), (đã bị loại bỏ vào ngày 14/11/2022)
-        'Fail attempt sau 10PM': x[(x['Fail attempt sau 10PM']==1)]['waypoint_id'].count(),
-        'Lịch sử tối thiểu 3 cuộc gọi ra': x[x['Lịch sử tối thiểu 3 cuộc gọi ra']==1]['waypoint_id'].count(),
-        'Tối thiểu 3 cuộc gọi với thời gian đổ chuông >10s trong trường hợp khách không nghe máy': x[x['Tối thiểu 3 cuộc gọi với thời gian đổ chuông >10s trong trường hợp khách không nghe máy']==1]['waypoint_id'].count(),
-        'Thời gian giữa mỗi cuộc gọi tối thiểu 1p': x[x['Thời gian giữa mỗi cuộc gọi tối thiểu 1p']==1]['waypoint_id'].count(),
-        'Thời gian gọi sớm hơn hoặc bằng thời gian xử lý thất bại': x[x['Thời gian gọi sớm hơn hoặc bằng thời gian xử lý thất bại']==1]['waypoint_id'].count(),
-        'Không có cuộc gọi tiêu chuẩn': x[x['Không có cuộc gọi tiêu chuẩn']==1]['waypoint_id'].count(), 
-        'Không có cuộc gọi thành công': x[x['Không có cuộc gọi thành công']==1]['waypoint_id'].count(),
-        'Không có hình ảnh POD': x[x['Không có hình ảnh POD']==1]['waypoint_id'].count(),
+        'Fail attempt sau 10PM': x[(x['Fail attempt sau 10PM']==1)]['waypoint_id'].nunique(),
+        'Lịch sử tối thiểu 3 cuộc gọi ra': x[x['Lịch sử tối thiểu 3 cuộc gọi ra']==1]['waypoint_id'].nunique(),
+        'Tối thiểu 3 cuộc gọi với thời gian đổ chuông >10s trong trường hợp khách không nghe máy': x[x['Tối thiểu 3 cuộc gọi với thời gian đổ chuông >10s trong trường hợp khách không nghe máy']==1]['waypoint_id'].nunique(),
+        'Thời gian giữa mỗi cuộc gọi tối thiểu 1p': x[x['Thời gian giữa mỗi cuộc gọi tối thiểu 1p']==1]['waypoint_id'].nunique(),
+        'Thời gian gọi sớm hơn hoặc bằng thời gian xử lý thất bại': x[x['Thời gian gọi sớm hơn hoặc bằng thời gian xử lý thất bại']==1]['waypoint_id'].nunique(),
+        'Không có cuộc gọi tiêu chuẩn': x[(x['Không có cuộc gọi tiêu chuẩn']==1) | (x['no_call_log_aloninja']==1)]['waypoint_id'].nunique(), 
+        'Không có cuộc gọi thành công': x[x['Không có cuộc gọi thành công']==1]['waypoint_id'].nunique(),
+        'Không có hình ảnh POD': x[x['Không có hình ảnh POD']==1]['waypoint_id'].nunique(),
 
 
         ## waypoint
@@ -278,7 +261,6 @@ def bi_agg(x):
 
 
 
-# Phase 4: get vol_of_ontime_KPI
 
 # Phase 5: mapping infor
 def mapping_phase(x, url):
@@ -332,21 +314,18 @@ def export_final_reason_file(x):
 ### ___________________________________________________ Main ____________________________________________________________  
 def read_pipeline(url_agg:str, str_time_from_:str, str_time_to_:str, split_from_:str, split_to_:str):
   print('hello Ninja !!!' + str(pd.Timestamp.now()))
-
+  reading_last_7_day()
   # reading and preprecessing
   print('Phase 1: Reading Data and preprocessing' + '-'*100)
   big_frame = read_folder_pod_resultQA_in_month(str_time_from_, str_time_to_)
-  df = big_frame.loc[(pd.to_datetime(big_frame['attempt_date']) >= pd.Timestamp(str_time_from_)) & (pd.to_datetime(big_frame['attempt_date']) <= pd.Timestamp(str_time_to_))]
-  df = get_first_attempt_date(df) ## 11/03/2022: get first attempt to mapping
+  df = pre_processing(big_frame.loc[(pd.to_datetime(big_frame['attempt_date']) >= pd.Timestamp(str_time_from_)) & (pd.to_datetime(big_frame['attempt_date']) <= pd.Timestamp(str_time_to_))])
 
 
   # dispute
   clear_output()
   sales_channel(df)
-
   print('Date collected: ', df['attempt_date'].unique())
-
-  print('Phase 2: Preprocessing, Disputing, and Groupby Driver counting' + '-'*100)
+  print('Phase 2: Disputing, and Groupby Driver counting' + '-'*100)
   df = final_dispute(df)
   spliting_file(df, split_from=split_from_, split_to=split_to_)
   
