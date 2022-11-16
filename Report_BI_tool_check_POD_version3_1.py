@@ -139,7 +139,7 @@ def final_dispute(x):
     gc = gspread.authorize(creds)
     temp = gc.open_by_url(i).worksheet("Detail")
     # Convert to a DataFrame and render.
-    disputing = pd.concat([disputing, get_as_dataframe(temp, evaluate_formulas=True)[['order_id','waypoint_id', 'Status']]])
+    disputing = pd.concat([disputing, get_as_dataframe(temp, evaluate_formulas=True)[['waypoint_id', 'Status']]])
 
 
   disputing =  disputing.dropna(how='all', axis=1).dropna(how='all', axis=0).drop_duplicates(subset=['waypoint_id', 'order_id'])
