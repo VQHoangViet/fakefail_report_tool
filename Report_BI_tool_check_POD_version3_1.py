@@ -89,7 +89,7 @@ def reading_last_7_day():
       test.loc[test['count_call_log'] == 0, 'no_call_log_aloninja'] = 1
       test.loc[test['pod_photo'] == 'no photo', 'Không có hình ảnh POD'] = 1
       test = test.rename(columns={'Thời gian ghi nhận fail attempt phải trước 10PM' : 'Fail attempt sau 10PM',
-      'Lịch sử tối thiểu 3 cuộc gọi ': 'Lịch sử tối thiểu 3 cuộc gọi ra',
+      'Lịch sử tối thiểu 3 cuộc gọi': 'Lịch sử tối thiểu 3 cuộc gọi ra',
       'Thời gian giữa mỗi cuộc gọi tối thiểu 1 phút' : 'Thời gian giữa mỗi cuộc gọi tối thiểu 1p',
       'Thời gian đổ chuông >10s trong trường hợp khách không nghe máy' : 'Tối thiểu 3 cuộc gọi với thời gian đổ chuông >10s trong trường hợp khách không nghe máy',
       'no_call_log_aloninja' : 'Không có cuộc gọi tiêu chuẩn',
