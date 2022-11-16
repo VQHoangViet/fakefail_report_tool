@@ -231,7 +231,7 @@ def bi_agg(x):
         'Tối thiểu 3 cuộc gọi với thời gian đổ chuông >10s trong trường hợp khách không nghe máy': x[x['Tối thiểu 3 cuộc gọi với thời gian đổ chuông >10s trong trường hợp khách không nghe máy']==1]['waypoint_id'].nunique(),
         'Thời gian giữa mỗi cuộc gọi tối thiểu 1p': x[x['Thời gian giữa mỗi cuộc gọi tối thiểu 1p']==1]['waypoint_id'].nunique(),
         'Thời gian gọi sớm hơn hoặc bằng thời gian xử lý thất bại': x[x['Thời gian gọi sớm hơn hoặc bằng thời gian xử lý thất bại']==1]['waypoint_id'].nunique(),
-        'Không có cuộc gọi tiêu chuẩn': x[(x['Không có cuộc gọi tiêu chuẩn']==1) | (x['no_call_log_aloninja']==1)]['waypoint_id'].nunique(), 
+        'Không có cuộc gọi tiêu chuẩn': x[(x['Không có cuộc gọi tiêu chuẩn']==1)]['waypoint_id'].nunique(), 
         'Không có cuộc gọi thành công': x[x['Không có cuộc gọi thành công']==1]['waypoint_id'].nunique(),
         'Không có hình ảnh POD': x[x['Không có hình ảnh POD']==1]['waypoint_id'].nunique(),
 
