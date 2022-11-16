@@ -314,7 +314,6 @@ def export_final_reason_file(x):
 ### ___________________________________________________ Main ____________________________________________________________  
 def read_pipeline(url_agg:str, str_time_from_:str, str_time_to_:str, split_from_:str, split_to_:str):
   print('hello Ninja !!!' + str(pd.Timestamp.now()))
-  reading_last_7_day()
   # reading and preprecessing
   print('Phase 1: Reading Data and preprocessing' + '-'*100)
   big_frame = read_folder_pod_resultQA_in_month(str_time_from_, str_time_to_)
