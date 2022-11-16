@@ -127,7 +127,7 @@ def final_dispute(x):
   x['affected_by_discreting_bug'] = 0
   url = [
     'https://docs.google.com/spreadsheets/d/1i1Rha9Qg1qZ9sGI0-ddX9QBlO6Jg9URy2tm62Fu3X20/edit#gid=1966091300',
-    'https://docs.google.com/spreadsheets/d/1I-Tejd6M-Cv1Suq6D-8tqowNrb0dPHcn/edit#gid=1518203630',
+    'https://docs.google.com/spreadsheets/d/14J704NXH8hKJ4XWmmoGWEKozA66lJhui1HIaSVsAacw/edit#gid=1409944538',
     'https://docs.google.com/spreadsheets/d/1P0ohdLCGGvk037IHEFeiGvvc7l2bku5HIYCSgLT4i4o/edit#gid=419800374'
   ]
 
