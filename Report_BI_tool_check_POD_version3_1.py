@@ -308,10 +308,12 @@ def export_final_driver_file(final):
   # str(pd.to_datetime(final['first_attempt_date']).dt.month.max()) + '_' + str((pd.to_datetime(final['first_attempt_date']).dt.year.max()))
   final.to_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/final_data_monthly/final_driver_data '+ str((pd.to_datetime(final['first_attempt_date']).dt.year.max())) + "_" + str(pd.to_datetime(final['first_attempt_date']).dt.month.max()) +'.csv', index = False)
   # dashboard final data
+  stuck = final.loc[final.driver_type == 'fulltime']
+
   try:
-    final.drop(columns=['attempt_fake_fail_list', 'Final_Fake_fail_tracking_id_list']).to_csv('/content/DB_final_driver_data '+ str((pd.to_datetime(final['first_attempt_date']).dt.year.max())) + "_" + str(pd.to_datetime(final['first_attempt_date']).dt.month.max()) +'.csv', index = False)
+    stuck.drop(columns=['attempt_fake_fail_list', 'Final_Fake_fail_tracking_id_list']).to_csv('/content/DB_final_driver_data '+ str((pd.to_datetime(final['first_attempt_date']).dt.year.max())) + "_" + str(pd.to_datetime(final['first_attempt_date']).dt.month.max()) +'.csv', index = False)
   except:
-    final.to_csv('/content/DB_final_driver_data '+ str((pd.to_datetime(final['first_attempt_date']).dt.year.max())) + "_" + str(pd.to_datetime(final['first_attempt_date']).dt.month.max()) +'.csv', index = False)
+    stuck.to_csv('/content/DB_final_driver_data '+ str((pd.to_datetime(final['first_attempt_date']).dt.year.max())) + "_" + str(pd.to_datetime(final['first_attempt_date']).dt.month.max()) +'.csv', index = False)
 
 def export_final_reason_file(x):
   print('Reason fail: start!')
