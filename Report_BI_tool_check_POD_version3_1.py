@@ -32,7 +32,7 @@ def get_first_attempt_date(x):
   x = x.merge(first_attempt_date, how='inner', left_on='tracking_id', right_on='tracking_id')
   return x
 
-def sales_channel(x):
+def key_shipper(x):
   x.loc[x['sales_channel'].str.contains('KNJVN'), 'sales_channel'] = 'Tiktok'
   x.loc[x['sales_channel'].str.contains('NLVN'), 'sales_channel'] = 'Lazada'
   x.loc[(x['sales_channel'].str.contains('SPE')) | (x['sales_channel'].str.contains('RSPVNSPEVN')), 'sales_channel'] = 'Shopee'
@@ -65,8 +65,8 @@ def pre_processing(x):
   x['count_call_log'] = x['count_call_log'].fillna(0)
   x['driver_type'] =  x.driver_name.apply(driver_finder)
   x =  x.dropna(how='all', axis=1).dropna(how='all', axis=0)
+  x = key_shipper(x)
   x = get_first_attempt_date(x)
-  x = sales_channel(x)
 
   print('#end')
   return x
