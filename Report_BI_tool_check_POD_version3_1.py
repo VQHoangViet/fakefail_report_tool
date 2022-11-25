@@ -65,8 +65,9 @@ def pre_processing(x):
   x['count_call_log'] = x['count_call_log'].fillna(0)
   x['driver_type'] =  x.driver_name.apply(driver_finder)
   x =  x.dropna(how='all', axis=1).dropna(how='all', axis=0)
-  x = sales_channel(x)
   x = get_first_attempt_date(x)
+  x = sales_channel(x)
+
   print('#end')
   return x
 
