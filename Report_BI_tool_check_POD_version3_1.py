@@ -33,9 +33,9 @@ def get_first_attempt_date(x):
   return x
 
 def key_shipper(x):
-  x.loc[x['sales_channel'].str.contains('KNJVN'), 'sales_channel'] = 'Tiktok'
-  x.loc[x['sales_channel'].str.contains('NLVN'), 'sales_channel'] = 'Lazada'
-  x.loc[(x['sales_channel'].str.contains('SPE')) | (x['sales_channel'].str.contains('RSPVNSPEVN')), 'sales_channel'] = 'Shopee'
+  x.loc[x['tracking_id'].str.contains('KNJVN'), 'sales_channel'] = 'Tiktok'
+  x.loc[x['tracking_id'].str.contains('NLVN'), 'sales_channel'] = 'Lazada'
+  x.loc[(x['tracking_id'].str.contains('SPE')) | (x['sales_channel'].str.contains('RSPVNSPEVN')), 'sales_channel'] = 'Shopee'
   return x
 
 def pre_processing(x):
