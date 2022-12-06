@@ -88,7 +88,7 @@ def reading_last_7_day():
   for i in url:
     test = pd.read_csv('https://docs.google.com/spreadsheets/d/' + 
                     str(i.split("d/")[1].split("/e")[0]) +
-                  '/export?gid=0&format=csv').drop_duplicates(subset=['order_id', 'waypoint_id'], keep='last')
+                  '/export?gid=0&format=csv').drop_duplicates(subset=['order_id', 'waypoint_id', 'waypoint_photo_id'], keep='last')
     if pd.to_datetime(test['attempt_date'].unique()[0]) <= pd.Timestamp('2022-11-11'):
       test['no_call_log_aloninja'] = 0
       test['Không có hình ảnh POD'] = 0
