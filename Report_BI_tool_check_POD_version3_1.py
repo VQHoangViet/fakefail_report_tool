@@ -261,8 +261,8 @@ def bi_agg(x):
 
 
         ## waypoint
-        'total_attempt': x['waypoint_id'].count(),
-        'total_fake_fail_attempt': x.loc[x['result'] == 'fake_fail','waypoint_id'].count(),
+        'total_attempt': x['waypoint_id'].nunique(),
+        'total_fake_fail_attempt': x.loc[x['result'] == 'fake_fail','waypoint_id'].nunique(),
         'attempt_fake_fail_list': set(x[x['result']=='fake_fail']['waypoint_id']),
         'disputing_attempt':  x[(x['disputing']==1)]['waypoint_id'].nunique(),
         'correted_by_disputing_attempt':  x[(x['corrected_dispute']==0) & (x['result']=='fake_fail')]['waypoint_id'].nunique(),
