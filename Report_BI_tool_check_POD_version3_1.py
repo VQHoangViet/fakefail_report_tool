@@ -43,7 +43,7 @@ def pre_processing(x):
   x.drop(columns=['Unnamed: 0',  'Cuộc gọi phải phát sinh trước 8PM', 'first_attempt_date'], inplace=True, errors='ignore')
   x = x.sort_values(['attempt_datetime'])
   x = x.dropna(how='all', axis=1).dropna(how='all', axis=0) 
-  x = x.drop_duplicates(subset=['order_id','waypoint_id'], keep='last')
+  # x = x.drop_duplicates(subset=['order_id','waypoint_id'], keep='last')
   x.attempt_datetime = pd.to_datetime(x.attempt_datetime)
   x[['Fail attempt sau 10PM',
       'Lịch sử tối thiểu 3 cuộc gọi ra',
