@@ -153,7 +153,9 @@ def final_dispute(x):
     'https://docs.google.com/spreadsheets/d/14J704NXH8hKJ4XWmmoGWEKozA66lJhui1HIaSVsAacw/edit#gid=1409944538',
     'https://docs.google.com/spreadsheets/d/1tcc9oOKLX7u5iVksTXVaG421KEDSLDhrK2IB8BrS-4w/edit#gid=1518203630',
     'https://docs.google.com/spreadsheets/d/1P0ohdLCGGvk037IHEFeiGvvc7l2bku5HIYCSgLT4i4o/edit#gid=419800374',
-    'https://docs.google.com/spreadsheets/d/1TG97G9-h5VwfnvLwTWPfK9myq41galjDvZmCcmPTE74/edit#gid=1171452712'
+    'https://docs.google.com/spreadsheets/d/1TG97G9-h5VwfnvLwTWPfK9myq41galjDvZmCcmPTE74/edit#gid=1171452712',
+    'https://docs.google.com/spreadsheets/d/1ZU_M3haDS-r2bQ-Y2II4rSOhtdkV96DMEK1ua4BopY8/edit?usp=sharing'
+
   ]
 
   disputing = pd.DataFrame()
