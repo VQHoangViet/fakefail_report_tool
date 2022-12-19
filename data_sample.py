@@ -142,17 +142,10 @@ def sample_data(link_pod_manual_check, start_day, end_day):
     except:
       data = data.append(a)
 
-  return data
+  data.to_csv('sample_data.csv')
 
-# data_sample = sample_data('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/Sampling model/_qa_vn__plan_for_ff_pod_manual_check_2022_2022-12-19T04_30_35.64012Z.csv', '2022-12-11', '2022-12-27')
+# sample_data('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/Sampling model/_qa_vn__plan_for_ff_pod_manual_check_2022_2022-12-19T04_30_35.64012Z.csv', '2022-12-11', '2022-12-27')
 
-# data_sample.shape
-
-# data_sample.driver_id.value_counts()
-
-# data_sample.to_csv("data_sampe_11_12_to_17_12.csv")
-
-# data_sample['reason'].value_counts()
-
-# data_sample['region'].value_counts()
+# df = pd.read_csv('sample_data.csv')
+# df.shape
 
