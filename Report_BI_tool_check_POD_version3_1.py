@@ -240,8 +240,8 @@ def final_dispute(x):
 
 
   # final:
-  print('Bug case: ', x[ (x['result'] == 'fake_fail') & (x['affected_by_discreting_bug'] == 0) & ((x['affected_by_mass_bug'] == 0) & (x['corrected_dispute'] == 0)) ].shape)
-  x.loc[ (x['result'] == 'fake_fail') & (x['affected_by_discreting_bug'] == 0) & ((x['affected_by_mass_bug'] == 0) & (x['corrected_dispute'] == 0))   , 'final_result'] = 1
+  print('Bug case: ', x[ (x['fully_driver_result'] == 'fake_fail') & (x['affected_by_discreting_bug'] == 0) & ((x['affected_by_mass_bug'] == 0) & (x['corrected_dispute'] == 0)) ].shape)
+  x.loc[ (x['fully_driver_result'] == 'fake_fail') & (x['affected_by_discreting_bug'] == 0) & ((x['affected_by_mass_bug'] == 0) & (x['corrected_dispute'] == 0))   , 'final_result'] = 1
 
   ## Nocode here
   print('Done Dispute!')
@@ -257,7 +257,7 @@ def spliting_file(x, split_from, split_to):
 
 def sales_channel(x):
   print(x.info())
-  x.loc[(~x['sales_channel'].isna()) & (x['result']=='fake_fail')].groupby(['first_attempt_date','region', 'sales_channel'])['tracking_id'].nunique().reset_index().to_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/FF Oct Final/sales_channels_ffcase ' + str((pd.to_datetime(x['first_attempt_date']).dt.year.max())) + "_" + str(pd.to_datetime(x['first_attempt_date']).dt.month.min()) +'_to_'+ str((pd.to_datetime(x['first_attempt_date']).dt.year.max())) + "_" + str(pd.to_datetime(x['first_attempt_date']).dt.month.max()) +'.csv', index = False)
+  x.loc[(~x['sales_channel'].isna()) & (x['fully_driver_result']=='fake_fail')].groupby(['first_attempt_date','region', 'sales_channel'])['tracking_id'].nunique().reset_index().to_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/FF Oct Final/sales_channels_ffcase ' + str((pd.to_datetime(x['first_attempt_date']).dt.year.max())) + "_" + str(pd.to_datetime(x['first_attempt_date']).dt.month.min()) +'_to_'+ str((pd.to_datetime(x['first_attempt_date']).dt.year.max())) + "_" + str(pd.to_datetime(x['first_attempt_date']).dt.month.max()) +'.csv', index = False)
   print('Done sales_channel~~~~~~~~~~~~~~')
 
 
@@ -267,25 +267,25 @@ def sales_channel(x):
 def reason_fail_agg(x):
     names = {
         'total_attempt': x['waypoint_id'].nunique(),
-        'BI_FakeFail': x[x['result']=='fake_fail']['waypoint_id'].nunique(),
-        'BI_FakeFail_order_count': x[x['result']=='fake_fail']['order_id'].nunique(),
+        'BI_FakeFail': x[x['fully_driver_result']=='fake_fail']['waypoint_id'].nunique(),
+        'BI_FakeFail_order_count': x[x['fully_driver_result']=='fake_fail']['order_id'].nunique(),
 
         ## Updated on 27/09/2022 (starting time on data is 19/09/2022)
-        'freelancer_FF_attempt' : x[(x['driver_type']=='freelancer') & (x['result']=='fake_fail')]['waypoint_id'].nunique(),
-        'fulltime_FF_attempt' : x[(x['driver_type']=='fulltime') & (x['result']=='fake_fail')]['waypoint_id'].nunique(),
-        '3PL_FF_attempt' : x[(x['driver_type']=='3PLs') & (x['result']=='fake_fail')]['waypoint_id'].nunique(),
-        'others_FF_attempt' : x[(x['driver_type']=='others') & (x['result']=='fake_fail')]['waypoint_id'].nunique(),
+        'freelancer_FF_attempt' : x[(x['driver_type']=='freelancer') & (x['fully_driver_result']=='fake_fail')]['waypoint_id'].nunique(),
+        'fulltime_FF_attempt' : x[(x['driver_type']=='fulltime') & (x['fully_driver_result']=='fake_fail')]['waypoint_id'].nunique(),
+        '3PL_FF_attempt' : x[(x['driver_type']=='3PLs') & (x['fully_driver_result']=='fake_fail')]['waypoint_id'].nunique(),
+        'others_FF_attempt' : x[(x['driver_type']=='others') & (x['fully_driver_result']=='fake_fail')]['waypoint_id'].nunique(),
         ##
-        'freelancer_FF_orders' : x[(x['driver_type']=='freelancer') & (x['result']=='fake_fail')]['order_id'].nunique(),
-        'fulltime_FF_orders' : x[(x['driver_type']=='fulltime') & (x['result']=='fake_fail')]['order_id'].nunique(),
-        '3PL_FF_orders' : x[(x['driver_type']=='3PLs') & (x['result']=='fake_fail')]['order_id'].nunique(),
-        'others_FF_orders' : x[(x['driver_type']=='others') & (x['result']=='fake_fail')]['order_id'].nunique(),
+        'freelancer_FF_orders' : x[(x['driver_type']=='freelancer') & (x['fully_driver_result']=='fake_fail')]['order_id'].nunique(),
+        'fulltime_FF_orders' : x[(x['driver_type']=='fulltime') & (x['fully_driver_result']=='fake_fail')]['order_id'].nunique(),
+        '3PL_FF_orders' : x[(x['driver_type']=='3PLs') & (x['fully_driver_result']=='fake_fail')]['order_id'].nunique(),
+        'others_FF_orders' : x[(x['driver_type']=='others') & (x['fully_driver_result']=='fake_fail')]['order_id'].nunique(),
         ##
 
         # dispute case
         'dispute_case': x[x['disputing']==1]['waypoint_id'].nunique(),
        
-        # final result
+        # final fully_driver_result
         'final_result': x[x['final_result']==1]['waypoint_id'].nunique(),
         
     }
@@ -307,22 +307,22 @@ def bi_agg(x):
 
         ## waypoint
         'total_attempt': x['waypoint_id'].nunique(),
-        'total_fake_fail_attempt': x.loc[x['result'] == 'fake_fail','waypoint_id'].nunique(),
-        'attempt_fake_fail_list': set(x[x['result']=='fake_fail']['waypoint_id']),
+        'total_fake_fail_attempt': x.loc[x['fully_driver_result'] == 'fake_fail','waypoint_id'].nunique(),
+        'attempt_fake_fail_list': set(x[x['fully_driver_result']=='fake_fail']['waypoint_id']),
         'disputing_attempt':  x[(x['disputing']==1)]['waypoint_id'].nunique(),
-        'correted_by_disputing_attempt':  x[(x['corrected_dispute']==0) & (x['result']=='fake_fail')]['waypoint_id'].nunique(),
-        'total_attempt_affected_by_mass_bug': x[(x['affected_by_mass_bug']==1) & (x['result']=='fake_fail')]['waypoint_id'].nunique(),
-        'total_attempt_affected_by_discreting_bug': x[(x['affected_by_discreting_bug']==1) & (x['result']=='fake_fail')]['waypoint_id'].nunique(),
-        'final_disputation_attempt':  x[(x['corrected_dispute']==0) & (x['result']=='fake_fail')]['waypoint_id'].nunique(),
+        'correted_by_disputing_attempt':  x[(x['corrected_dispute']==0) & (x['fully_driver_result']=='fake_fail')]['waypoint_id'].nunique(),
+        'total_attempt_affected_by_mass_bug': x[(x['affected_by_mass_bug']==1) & (x['fully_driver_result']=='fake_fail')]['waypoint_id'].nunique(),
+        'total_attempt_affected_by_discreting_bug': x[(x['affected_by_discreting_bug']==1) & (x['fully_driver_result']=='fake_fail')]['waypoint_id'].nunique(),
+        'final_disputation_attempt':  x[(x['corrected_dispute']==0) & (x['fully_driver_result']=='fake_fail')]['waypoint_id'].nunique(),
 
 
         ## tracking id
         'total_orders': x['order_id'].nunique(),
-        'total_fake_fail_orders': x[x['result']=='fake_fail']['order_id'].nunique(),
+        'total_fake_fail_orders': x[x['fully_driver_result']=='fake_fail']['order_id'].nunique(),
         'disputing_orders':  x[(x['disputing']==1)]['order_id'].nunique(),
-        'correted_by_disputing_orders':  x[(x['corrected_dispute']==1) & (x['result']=='fake_fail')]['order_id'].nunique(),
-        'total_orders_affected_by_mass_bug': x[(x['affected_by_mass_bug']==1) & (x['result']=='fake_fail')]['order_id'].nunique(),
-        'total_orders_affected_by_discreting_bug': x[(x['affected_by_discreting_bug']==1) & (x['result']=='fake_fail')]['order_id'].nunique(),
+        'correted_by_disputing_orders':  x[(x['corrected_dispute']==1) & (x['fully_driver_result']=='fake_fail')]['order_id'].nunique(),
+        'total_orders_affected_by_mass_bug': x[(x['affected_by_mass_bug']==1) & (x['fully_driver_result']=='fake_fail')]['order_id'].nunique(),
+        'total_orders_affected_by_discreting_bug': x[(x['affected_by_discreting_bug']==1) & (x['fully_driver_result']=='fake_fail')]['order_id'].nunique(),
         'real_FF_orders': x[(x['final_result']==1)]['order_id'].nunique(),
         'Final_Fake_fail_tracking_id_list': x[(x['final_result']==1)]['tracking_id'].unique()
         }
