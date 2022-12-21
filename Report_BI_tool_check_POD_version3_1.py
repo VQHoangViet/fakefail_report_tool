@@ -14,12 +14,23 @@ from os import listdir
 from os.path import isfile, join
 import os
 from dateutil.relativedelta import relativedelta
+import matplotlib.pyplot as plt
+import seaborn as sns
+import plotly.express as px
+import plotly.graph_objects as go
+import plotly.figure_factory as ff
+from plotly.subplots import make_subplots
+import warnings
+warnings.filterwarnings('ignore')
+
 
 drive.mount('/content/drive', force_remount=True)
 pd.set_option('display.max_columns', None)
 auth.authenticate_user()
 
-
+# building plotly dashboard
+import plotly.io as pio
+pio.renderers.default = 'colab'
 
 
 # module:
@@ -285,21 +296,35 @@ def bi_agg(x):
         }
     return pd.Series(names)
 
-# Phase 5: mapping infor
+# Phase 5: grouping by driver_id
 def mapping_phase(x, url):
-  x = x.groupby(['driver_id' ,'driver_name', 'driver_type','first_attempt_date', 'hub_id',  'hub_name',	'region']).apply(bi_agg).reset_index() ###
-  x.to_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/Report BI Tool/driver_groupby_attempt_date.csv', index=False)
+  # load hub_info
   hub_info = pd.read_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/Dataset/Hubs enriched - hub_info.csv')
-  agg = pd.read_csv(url)[['dest_hub_date', 'dest_hub_id', 'dest_hub_name', 'volume_of_ontime_KPI' ]]
-  agg.rename(columns={"volume_of_ontime_KPI": 'Total orders reach LM hub' }, inplace=True)
+  
+  # get volume_of_ontime_KPI
+  volume_of_ontime_KPI = pd.read_csv(url)[['dest_hub_date', 'dest_hub_id', 'dest_hub_name', 'volume_of_ontime_KPI' ]]
+  volume_of_ontime_KPI.rename(columns={"volume_of_ontime_KPI": 'Total orders reach LM hub' }, inplace=True)
 
-  agg_driver = x.merge(agg, how='left', left_on=['first_attempt_date','hub_id'], right_on=['dest_hub_date','dest_hub_id'],suffixes=('', '_y'))
+  # group by driver_id apply bi_agg
+  x = x.groupby(['driver_id' ,'driver_name', 'driver_type','first_attempt_date', 'hub_id',  'hub_name',	'region']).apply(bi_agg).reset_index() ###
 
-  # agg_driver['Total orders reach LM hub'] = agg_driver.fillna(0)['Total orders reach LM hub'] + agg_driver.fillna(0)['Total orders reach LM hub_y']
+  # group by hub_id apply bi_agg
+  hub = hub.groupby(['first_attempt_date' ,'hub_id', 'hub_name', 'region']).apply(bi_agg).reset_index()
+
+ 
+  # merge with volume_of_ontime_KPI
+  agg_driver = x.merge(volume_of_ontime_KPI, how='left', left_on=['first_attempt_date','hub_id'], right_on=['dest_hub_date','dest_hub_id'],suffixes=('', '_y'))
+  agg_hub = hub.merge(volume_of_ontime_KPI, how='left', left_on=['first_attempt_date','hub_id'], right_on=['dest_hub_date','dest_hub_id'],suffixes=('', '_y'))
+
+  # drop columns
   agg_driver.drop(columns=['dest_hub_date',	'dest_hub_id',	'dest_hub_name'], inplace=True)
-  agg_driver = agg_driver.merge(hub_info, how='left', left_on=['hub_id'], right_on=['ID'],suffixes=('', '_')).drop(columns=['ID', 'Is Deleted', 'Name', 'Province Code', 'Region'])
+  agg_hub.drop(columns=['dest_hub_date',	'dest_hub_id',	'dest_hub_name'], inplace=True)
 
-  return agg_driver
+  # merge with hub_info
+  agg_driver = agg_driver.merge(hub_info, how='left', left_on=['hub_id'], right_on=['ID'],suffixes=('', '_')).drop(columns=['ID', 'Is Deleted', 'Name', 'Province Code', 'Region'])
+  agg_hub = agg_hub.merge(hub_info, how='left', left_on=['hub_id'], right_on=['ID'],suffixes=('', '_')).drop(columns=['ID', 'Is Deleted', 'Name', 'Province Code', 'Region'])
+
+  return agg_driver, agg_hub
   
 # Phase 6: Computing
 def compute_phase(x):
@@ -308,22 +333,37 @@ def compute_phase(x):
   max_total_order = raw_data.groupby(['hub_id', 'first_attempt_date'])[['Total orders reach LM hub']].transform(lambda x: x.max())
   raw_data['original_FF_index'] = (raw_data['total_fake_fail_orders']/max_total_order['Total orders reach LM hub']).fillna(0)
   raw_data['actual_fakefail_index'] = (raw_data['total_fake_fail_attempt']/raw_data['total_attempt']).fillna(0)
+
   return raw_data
 
 # Final: exporting
 def export_final_driver_file(final):
+  # final driver data
   final = final.sort_values('first_attempt_date')
-  # raw_data.to_csv('/content/sample_data/final_driver_data.csv')
-  # str((pd.to_datetime(final['first_attempt_date']).dt.year.max()) + "_" + str(pd.to_datetime(final['first_attempt_date']).dt.month.max())
-  # str(pd.to_datetime(final['first_attempt_date']).dt.month.max()) + '_' + str((pd.to_datetime(final['first_attempt_date']).dt.year.max()))
+
+  # export final driver data
   final.to_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/final_data_monthly/final_driver_data '+ str((pd.to_datetime(final['first_attempt_date']).dt.year.max())) + "_" + str(pd.to_datetime(final['first_attempt_date']).dt.month.max()) +'.csv', index = False)
+  
   # dashboard final data
   stuck = final.loc[final.driver_type == 'fulltime']
-
   try:
     stuck.drop(columns=['attempt_fake_fail_list', 'Final_Fake_fail_tracking_id_list']).to_csv('/content/DB_final_driver_data '+ str((pd.to_datetime(final['first_attempt_date']).dt.year.max())) + "_" + str(pd.to_datetime(final['first_attempt_date']).dt.month.max()) +'.csv', index = False)
   except:
     stuck.to_csv('/content/DB_final_driver_data '+ str((pd.to_datetime(final['first_attempt_date']).dt.year.max())) + "_" + str(pd.to_datetime(final['first_attempt_date']).dt.month.max()) +'.csv', index = False)
+
+def export_final_hub_file(final):
+  # final hub data
+  final = final.sort_values('first_attempt_date')
+
+  # export final hub data
+  final.to_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/final_data_monthly/final_hub_data '+ str((pd.to_datetime(final['first_attempt_date']).dt.year.max())) + "_" + str(pd.to_datetime(final['first_attempt_date']).dt.month.max()) +'.csv', index = False)
+  
+  # dashboard final data
+  stuck = final.loc[final.driver_type == 'fulltime']
+  try:
+    stuck.drop(columns=['attempt_fake_fail_list', 'Final_Fake_fail_tracking_id_list']).to_csv('/content/DB_final_hub_data '+ str((pd.to_datetime(final['first_attempt_date']).dt.year.max())) + "_" + str(pd.to_datetime(final['first_attempt_date']).dt.month.max()) +'.csv', index = False)
+  except:
+    stuck.to_csv('/content/DB_final_hub_data '+ str((pd.to_datetime(final['first_attempt_date']).dt.year.max())) + "_" + str(pd.to_datetime(final['first_attempt_date']).dt.month.max()) +'.csv', index = False)
 
 def export_final_reason_file(x):
   print('Reason fail: start!')
@@ -343,13 +383,14 @@ def export_final_reason_file(x):
 ### ___________________________________________________ Main ____________________________________________________________  
 def read_pipeline(url_agg:str, str_time_from_:str, str_time_to_:str, split_from_:str, split_to_:str):
   print('hello Ninja !!!' + str(pd.Timestamp.now()))
-  # reading and preprecessing
+  
+  # Phase 1: Reading Data and preprocessing
   print('Phase 1: Reading Data and preprocessing' + '-'*100)
   big_frame = read_folder_pod_resultQA_in_month(str_time_from_, str_time_to_)
   df = pre_processing(big_frame.loc[(pd.to_datetime(big_frame['attempt_date']) >= pd.Timestamp(str_time_from_)) & (pd.to_datetime(big_frame['attempt_date']) <= pd.Timestamp(str_time_to_))])
 
 
-  # dispute
+  # Phase 2: Disputing, and Groupby Driver counting
   clear_output()
   sales_channel(df)
   print('Date collected: ', df['attempt_date'].unique())
@@ -360,7 +401,7 @@ def read_pipeline(url_agg:str, str_time_from_:str, str_time_to_:str, split_from_
 
 
 
-  # pre-compute phase
+  # Phase 3: Mapping
   clear_output()
   print(df['attempt_date'].unique())
   print("Number of Unique Driver_name: ", df['driver_name'].nunique())
@@ -369,11 +410,17 @@ def read_pipeline(url_agg:str, str_time_from_:str, str_time_to_:str, split_from_
   print("Shape: ", df.shape)
   print(df.info())
   print('Phase 3: Mapping' + '-'*100)
-  driver = mapping_phase(df, url_agg)
+  driver, hub = mapping_phase(df, url_agg)
   reason =  export_final_reason_file(df.groupby(['first_attempt_date', 'reason']).apply(reason_fail_agg).reset_index())
-  # compute phase
+  
+  
+  # Phase 4: Aggregating
   clear_output()
   print('Final: ' + '-'*100)
-  final = compute_phase(driver)
-  export_final_driver_file(final)
-  return df, final, reason
+  final_driver = compute_phase(driver)
+  final_hub = compute_phase(hub)
+
+  # Phase 5: Exporting
+  export_final_driver_file(final_driver)
+  export_final_hub_file(final_hub)
+  return df, final_driver,reason
