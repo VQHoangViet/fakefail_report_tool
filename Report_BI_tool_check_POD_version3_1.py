@@ -32,6 +32,30 @@ auth.authenticate_user()
 import plotly.io as pio
 pio.renderers.default = 'colab'
 
+# print bar progress percentage function
+def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '█', printEnd = "\r"):
+    """
+    Call in a loop to create terminal progress bar
+    @params:
+        iteration   - Required  : current iteration (Int)
+        total       - Required  : total iterations (Int)
+        prefix      - Optional  : prefix string (Str)
+        suffix      - Optional  : suffix string (Str)
+        decimals    - Optional  : positive number of decimals in percent complete (Int)
+        length      - Optional  : character length of bar (Int)
+        fill        - Optional  : bar fill character (Str)
+        printEnd    - Optional  : end character (e.g. """
+    
+    percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
+    filledLength = int(length * iteration // total)
+    bar = fill * filledLength + '-' * (length - filledLength)
+    print(f'\r{prefix} |{bar}| {percent}% {suffix}', end = printEnd)
+    # Print New Line on Complete
+    if iteration == total: 
+        print()
+
+
+
 
 # module:
 def get_first_attempt_date(x):
@@ -148,6 +172,7 @@ def driver_finder(x):
     elif( 'FTS' in x) | ('AGAR' in x) | ('189-FRLA' in x) | ('518-FRLA' in x) | ('XDOCT' in x) | ('TSS' in x) | ('GRAB' in x) | ('RAGA' in x) |('AHA' in x) : return '3PLs'
     else: return 'others'
 
+
 def get_disputetime():
     return (dt.datetime.now() - dt.timedelta(days=5)).date()
 
@@ -254,8 +279,15 @@ def reason_fail_agg(x):
         'freelancer_FF_orders' : x[(x['driver_type']=='freelancer') & (x['result']=='fake_fail')]['order_id'].nunique(),
         'fulltime_FF_orders' : x[(x['driver_type']=='fulltime') & (x['result']=='fake_fail')]['order_id'].nunique(),
         '3PL_FF_orders' : x[(x['driver_type']=='3PLs') & (x['result']=='fake_fail')]['order_id'].nunique(),
-        'others_FF_orders' : x[(x['driver_type']=='others') & (x['result']=='fake_fail')]['order_id'].nunique()
+        'others_FF_orders' : x[(x['driver_type']=='others') & (x['result']=='fake_fail')]['order_id'].nunique(),
         ##
+
+        # dispute case
+        'dispute_case': x[x['disputing']==1]['waypoint_id'].nunique(),
+       
+        # final result
+        'final_result': x[x['final_result']==1]['waypoint_id'].nunique(),
+        
     }
     return pd.Series(names)
 
@@ -306,14 +338,14 @@ def mapping_phase(x, url):
   volume_of_ontime_KPI.rename(columns={"volume_of_ontime_KPI": 'Total orders reach LM hub' }, inplace=True)
 
   # group by driver_id apply bi_agg
-  x = x.groupby(['driver_id' ,'driver_name', 'driver_type','first_attempt_date', 'hub_id',  'hub_name',	'region']).apply(bi_agg).reset_index() ###
+  driver = x.groupby(['driver_id' ,'driver_name', 'driver_type','first_attempt_date', 'hub_id',  'hub_name',	'region']).apply(bi_agg).reset_index() ###
 
   # group by hub_id apply bi_agg
-  hub = hub.groupby(['first_attempt_date' ,'hub_id', 'hub_name', 'region']).apply(bi_agg).reset_index()
+  hub = x.groupby(['first_attempt_date' ,'hub_id', 'hub_name', 'region']).apply(bi_agg).reset_index()
 
  
   # merge with volume_of_ontime_KPI
-  agg_driver = x.merge(volume_of_ontime_KPI, how='left', left_on=['first_attempt_date','hub_id'], right_on=['dest_hub_date','dest_hub_id'],suffixes=('', '_y'))
+  agg_driver = driver.merge(volume_of_ontime_KPI, how='left', left_on=['first_attempt_date','hub_id'], right_on=['dest_hub_date','dest_hub_id'],suffixes=('', '_y'))
   agg_hub = hub.merge(volume_of_ontime_KPI, how='left', left_on=['first_attempt_date','hub_id'], right_on=['dest_hub_date','dest_hub_id'],suffixes=('', '_y'))
 
   # drop columns
@@ -377,6 +409,7 @@ def export_final_reason_file(x):
   print('Reason fail: end!')
 
   return x
+
 
 
 
