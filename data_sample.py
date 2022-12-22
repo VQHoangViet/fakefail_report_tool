@@ -9,7 +9,7 @@ Original file is located at
 
 import pandas as pd
 import matplotlib.pyplot as plt
-from Report_BI_tool_check_POD_version3_1 import read_folder_pod_resultQA_in_month as ff
+from fakefail_report_tool import Report_BI_tool_check_POD_version3_1 as ff 
 import re 
 import pickle
 import numpy as np
@@ -36,7 +36,7 @@ def convert_reason(s):
   return x
 
 def extract_data(start_day, end_day):
-  data = ff(start_day, end_day)
+  data = ff.read_folder_pod_resultQA_in_month(start_day, end_day)
   data = data[(data['driver_type']!='fulltime')]
   data = data[(data['result']=='need_to_check')]
   data = data[['reason',	'hub_id', 'region', 'driver_id', 'waypoint_id', 'Fail attempt sau 10PM',	'Lịch sử tối thiểu 3 cuộc gọi ra',	
@@ -68,7 +68,7 @@ def predict(start_day, end_day):
   y_pre = model.predict(X)
   result=pd.DataFrame(y_pre, columns=['final_result'])
 
-  data = ff(start_day, end_day)
+  data = ff.read_folder_pod_resultQA_in_month(start_day, end_day)
   data = data[data['result']=='need_to_check']
   data = data[(data['driver_type'] != 'fulltime')]
 
