@@ -24,7 +24,9 @@ B2: Tải dữ liệu của query trên và up lên đây: https://drive.google.
 
 
 B3: Import function sample_data từ file: data_sample.py
+
 Câu lệnh import:
+
 from data_sample import sample_data
 
 
