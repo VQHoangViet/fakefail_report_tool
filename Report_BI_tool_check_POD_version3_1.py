@@ -159,6 +159,7 @@ def read_folder_pod_resultQA_in_month(str_time_from, str_time_to):
       renamed = pd.read_csv(filename)
       # append to list
       dfs.append(renamed)
+      printProgressBar(len(dfs), len(needed_df), prefix = 'Progress:', suffix = 'Complete', length = 50)
 
 
   
