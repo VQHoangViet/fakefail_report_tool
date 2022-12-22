@@ -25,10 +25,6 @@ B2: Tải dữ liệu của query trên và up lên đây: https://drive.google.
 
 B3: Import function sample_data từ file: data_sample.py
 
-Câu lệnh import:
-
-from data_sample import sample_data
-
 
 B4: chạy câu lệnh sau để lưu dữ liệu:
 sample_data(link_FF_pod_manual_check, start_day, end_day)
