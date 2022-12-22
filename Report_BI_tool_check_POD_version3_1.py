@@ -127,7 +127,6 @@ def reading_last_7_day():
     if pd.to_datetime(test['attempt_date'].unique()[0]) <= pd.Timestamp('2022-11-11'):
       test['no_call_log_aloninja'] = 0
       test['Không có hình ảnh POD'] = 0
-
       test.loc[test['count_call_log'] == 0, 'no_call_log_aloninja'] = 1
       test.loc[test['pod_photo'] == 'no photo', 'Không có hình ảnh POD'] = 1
       test = test.rename(columns={'Thời gian ghi nhận fail attempt phải trước 10PM' : 'Fail attempt sau 10PM',
@@ -138,8 +137,6 @@ def reading_last_7_day():
       'No Record' : 'Không có cuộc gọi thành công'}, errors='ignore').dropna(how='all', axis=1).drop(columns=['Unnamed: 0','Cuộc gọi phải phát sinh trước 8PM'], errors='ignore')
     test.to_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/Report BI Tool/Pre_processed data/{}.csv'.format(test['attempt_date'].unique()[0]), index=False)
     print('Done File: {}'.format(test['attempt_date'].unique()[0]))
-
-   
 
     
       
@@ -159,8 +156,8 @@ def read_folder_pod_resultQA_in_month(str_time_from, str_time_to):
   print(needed_df['date'].unique())
   for filename in needed_df['filename']:
       renamed = pd.read_csv(filename)
-      print('Path File:{}, duplicated :{}'.format(filename, renamed[renamed['waypoint_id'].duplicated()].shape))
       dfs.append(renamed)
+      printProgressBar(len(dfs), len(needed_df['filename']), prefix = 'Progress:', suffix = 'Complete', length = 50)
   big_frame = pd.concat(dfs, ignore_index=True)
   big_frame.info()
   return big_frame
@@ -419,7 +416,7 @@ def read_pipeline(url_agg:str, str_time_from_:str, str_time_to_:str, split_from_
   print('Phase 1: Reading Data and preprocessing' + '-'*100)
   big_frame = read_folder_pod_resultQA_in_month(str_time_from_, str_time_to_)
   df = pre_processing(big_frame.loc[(pd.to_datetime(big_frame['attempt_date']) >= pd.Timestamp(str_time_from_)) & (pd.to_datetime(big_frame['attempt_date']) <= pd.Timestamp(str_time_to_))])
-
+  
 
   # Phase 2: Disputing, and Groupby Driver counting
   clear_output()
