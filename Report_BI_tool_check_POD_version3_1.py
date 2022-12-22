@@ -32,8 +32,8 @@ auth.authenticate_user()
 import plotly.io as pio
 pio.renderers.default = 'colab'
 
-# print bar progress percentage function
-def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '-', printEnd = "\r"):
+# print bar progress bar in colaboratory
+def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '█', printEnd = "\r"):
     """
     Call in a loop to create terminal progress bar
     @params:
@@ -44,8 +44,9 @@ def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, 
         decimals    - Optional  : positive number of decimals in percent complete (Int)
         length      - Optional  : character length of bar (Int)
         fill        - Optional  : bar fill character (Str)
-        printEnd    - Optional  : end character (e.g. """
-    
+        printEnd    - Optional  : end character (e.g. "") (Str)
+
+    """
     percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
     filledLength = int(length * iteration // total)
     bar = fill * filledLength + '-' * (length - filledLength)
@@ -53,8 +54,6 @@ def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, 
     # Print New Line on Complete
     if iteration == total: 
         print()
-
-
 
 
 # module:
@@ -154,12 +153,11 @@ def read_folder_pod_resultQA_in_month(str_time_from, str_time_to):
   dfs = []
   for filename in needed_df['filename']:
       # print progess bar
-      print('Reading file: {}'.format(filename))
+      printProgressBar(len(dfs), len(needed_df), prefix = 'Progress:', suffix = 'Complete', length = 50)
       # read file
       renamed = pd.read_csv(filename)
       # append to list
       dfs.append(renamed)
-      printProgressBar(len(dfs), len(needed_df), prefix = 'Progress:', suffix = 'Complete', length = 50)
 
 
   
