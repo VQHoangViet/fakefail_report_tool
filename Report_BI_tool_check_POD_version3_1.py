@@ -152,11 +152,13 @@ def read_folder_pod_resultQA_in_month(str_time_from, str_time_to):
   # get data frame
   dfs = []
   for filename in needed_df['filename']:
+      # print progress bar
+      printProgressBar(needed_df['date'].tolist().index(filename) + 1, len(needed_df['filename']), prefix = 'Progress:', suffix = 'Complete', length = 50)
       # read file
       renamed = pd.read_csv(filename)
       # append to list
       dfs.append(renamed)
-  printProgressBar(len(dfs), len(needed_df), prefix = 'Progress:', suffix = 'Complete', length = 50)
+  
 
   
   # Concatenate all data into one DataFrame
