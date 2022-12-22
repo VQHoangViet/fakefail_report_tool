@@ -31,6 +31,9 @@ from data_sample import sample_data
 B4: chạy câu lệnh sau để lưu dữ liệu:
 sample_data(link_FF_pod_manual_check, start_day, end_day)
 
+B5: Tải dữ liệu sample data là xong nè >_*
+
 Ex:
 
-![image](https://user-images.githubusercontent.com/74056907/209055597-8c5b7419-3f43-48e2-b34a-f99aceb2a49b.png)
+![image](https://user-images.githubusercontent.com/74056907/209055774-428f6fba-5fa2-451e-bef1-4674bed8cc5a.png)
+
