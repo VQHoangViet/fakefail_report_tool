@@ -33,7 +33,7 @@ import plotly.io as pio
 pio.renderers.default = 'colab'
 
 # print bar progress percentage function
-def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '█', printEnd = "\r"):
+def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '-', printEnd = "\r"):
     """
     Call in a loop to create terminal progress bar
     @params:
@@ -153,9 +153,16 @@ def read_folder_pod_resultQA_in_month(str_time_from, str_time_to):
   # get data frame
   dfs = []
   for filename in needed_df['filename']:
-      printProgressBar(len(dfs), len(needed_df['filename']), prefix = 'Progress:', suffix = 'Complete', length = 50)
+      # print progess bar
+      print('Reading file: {}'.format(filename))
+      # read file
       renamed = pd.read_csv(filename)
+      # append to list
       dfs.append(renamed)
+
+
+  
+  # Concatenate all data into one DataFrame
   big_frame = pd.concat(dfs, ignore_index=True)
   big_frame.info()
   return big_frame
