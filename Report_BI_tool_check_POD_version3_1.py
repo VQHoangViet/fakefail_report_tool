@@ -149,12 +149,8 @@ def read_folder_pod_resultQA_in_month(str_time_from, str_time_to):
   # get data frame
   dfs = []
   for filename in needed_df['filename']:
-    # print filename
-    print(filename)
-    # read file
-    renamed = pd.read_csv(filename)
     # append to list
-    dfs.append(renamed)
+    dfs.append(pd.read_csv(filename))
   # Concatenate all data into one DataFrame
   big_frame = pd.concat(dfs, ignore_index=True)
   big_frame.info()
