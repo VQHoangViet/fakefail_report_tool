@@ -419,6 +419,7 @@ def read_pipeline(url_agg:str, str_time_from_:str, str_time_to_:str, split_from_
 
   # Phase 3: Mapping
   clear_output()
+  print('Phase 3: Mapping' + '-'*100)
   print(df['attempt_date'].unique())
   print("Number of Unique Driver_name: ", df['driver_name'].nunique())
   print("Number of Unique Driver_type: ", df['driver_type'].value_counts())
@@ -432,6 +433,7 @@ def read_pipeline(url_agg:str, str_time_from_:str, str_time_to_:str, split_from_
   
   # Phase 4: Aggregating
   clear_output()
+  print('Phase 4: Aggregating' + '-'*100)
   print('Final: ' + '-'*100)
   final_driver = compute_phase(driver)
   final_hub = compute_phase(hub)
