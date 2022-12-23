@@ -58,6 +58,29 @@ def printProgressBar (iteration, total, prefix = '', suffix = '', usepercent = T
         print(flush=True)
 
 
+
+def read_folder_pod_resultQA_in_month(str_time_from, str_time_to):
+  # Get data file names
+  mypath = '/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/Report BI Tool/Pre_processed data/'
+  source_df = pd.DataFrame({
+    'filename': [mypath + f for f in listdir(mypath) if (isfile(join(mypath, f)) & (os.path.splitext(os.path.basename(f))[1] == '.csv'))],
+    'date' : pd.to_datetime(pd.Series([item.replace(".csv", "") for item in [f for f in listdir(mypath) if (isfile(join(mypath, f)) & (os.path.splitext(os.path.basename(f))[1] == '.csv'))]]))
+  })
+  needed_df = source_df.loc[ (source_df.date >= pd.Timestamp(str_time_from)) & (source_df.date <= pd.Timestamp(str_time_to))] # select continually update date rang
+  # get data frame
+  dfs = []
+  for i, filename in enumerate(needed_df['filename']):
+    printProgressBar(i + 1, len(needed_df['filename'].tolist()), prefix = 'Progress:', suffix = 'Complete')
+    # append to list
+    dfs.append(pd.read_csv(filename))
+
+    # print progressBar to see the progress
+  # Concatenate all data into one DataFrame
+  big_frame = pd.concat(dfs, ignore_index=True)
+  big_frame.info()
+  return big_frame
+
+
 # module:
 def get_first_attempt_date(x):
   try:
@@ -141,27 +164,6 @@ def reading_last_7_day():
 
     
       
-
-def read_folder_pod_resultQA_in_month(str_time_from, str_time_to):
-  # Get data file names
-  mypath = '/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/Report BI Tool/Pre_processed data/'
-  source_df = pd.DataFrame({
-    'filename': [mypath + f for f in listdir(mypath) if (isfile(join(mypath, f)) & (os.path.splitext(os.path.basename(f))[1] == '.csv'))],
-    'date' : pd.to_datetime(pd.Series([item.replace(".csv", "") for item in [f for f in listdir(mypath) if (isfile(join(mypath, f)) & (os.path.splitext(os.path.basename(f))[1] == '.csv'))]]))
-  })
-  needed_df = source_df.loc[ (source_df.date >= pd.Timestamp(str_time_from)) & (source_df.date <= pd.Timestamp(str_time_to))] # select continually update date rang
-  # get data frame
-  dfs = []
-  for i, filename in enumerate(needed_df['filename']):
-    printProgressBar(i + 1, len(needed_df['filename'].tolist()), prefix = 'Progress:', suffix = 'Complete')
-    # append to list
-    dfs.append(pd.read_csv(filename))
-
-    # print progressBar to see the progress
-  # Concatenate all data into one DataFrame
-  big_frame = pd.concat(dfs, ignore_index=True)
-  big_frame.info()
-  return big_frame
 
 # Phase 2: pre-processing, dispute
 def driver_finder(x):
