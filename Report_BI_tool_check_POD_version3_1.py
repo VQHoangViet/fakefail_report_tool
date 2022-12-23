@@ -1,25 +1,26 @@
-import os
-import glob
-from google.colab import auth
-import gspread
-from google.auth import default
 import datetime as dt
-from google.colab import drive
-import pandas as pd
-import numpy as np
-from gspread_dataframe import get_as_dataframe, set_with_dataframe
-from IPython.display import clear_output
+import glob
+import os
+import shutil
+import warnings
 from os import listdir
 from os.path import isfile, join
-from dateutil.relativedelta import relativedelta
+
+import gspread
 import matplotlib.pyplot as plt
-import seaborn as sns
+import numpy as np
+import pandas as pd
 import plotly.express as px
-import plotly.graph_objects as go
 import plotly.figure_factory as ff
-import shutil
+import plotly.graph_objects as go
+import seaborn as sns
+from dateutil.relativedelta import relativedelta
+from google.auth import default
+from google.colab import auth, drive
+from gspread_dataframe import get_as_dataframe, set_with_dataframe
+from IPython.display import clear_output
 from plotly.subplots import make_subplots
-import warnings
+
 warnings.filterwarnings('ignore')
 
 pd.set_option('display.max_columns', None)
@@ -57,7 +58,37 @@ def printProgressBar (iteration, total, prefix = '', suffix = '', usepercent = T
     if iteration == total:
         print(flush=True)
 
+# Phase1: reading data
+def reading_last_7_day():
+  url = [
+  'https://docs.google.com/spreadsheets/d/11R3RKcyleeHDQPr2y3QpiOLReyc5_T8h2DNwS2fEYlA/edit#gid=0', ## thu 2
+  'https://docs.google.com/spreadsheets/d/1uKSr4flvsSvejRHPid1Ja718Ozl9XFXZAuxi2mVYbKI/edit#gid=0', ## thu3
+  'https://docs.google.com/spreadsheets/d/1XEXt04xtTfsdX3D0rLRriO2XpOxDLI93j9DX2YW1Fys/edit#gid=0', ## thu 4
+  'https://docs.google.com/spreadsheets/d/1U9PeYtVqxQOjl5za9UfxuSZmcKC3U_Z3Y9Ym1kxMhyM/edit#gid=0', ## Thu 5
+  'https://docs.google.com/spreadsheets/d/1Q-igQBq0CnR14PWokk4GZcOn3iJ7RboUKFSp6bMiOcg/edit#gid=0', ## Thu 6
+  'https://docs.google.com/spreadsheets/d/1kPl5-R6FpuRLiNvVmicSQCMYorXqWkUx1V9Frdj8_Ig/edit#gid=0',  ## thu 7
+  'https://docs.google.com/spreadsheets/d/1Z7wGCT4Sh8mQl69nSMZxDuMbbaWBEbWewlWQr_xm9T0/edit', ## cn 
 
+  ]
+
+  for j, i in enumerate(url):
+    test = pd.read_csv('https://docs.google.com/spreadsheets/d/' + 
+                    str(i.split("d/")[1].split("/e")[0]) +
+                  '/export?gid=0&format=csv').drop_duplicates(subset=['order_id', 'waypoint_id', 'waypoint_photo_id'], keep='last')
+    if pd.to_datetime(test['attempt_date'].unique()[0]) <= pd.Timestamp('2022-11-11'):
+      test['no_call_log_aloninja'] = 0
+      test['Không có hình ảnh POD'] = 0
+      test.loc[test['count_call_log'] == 0, 'no_call_log_aloninja'] = 1
+      test.loc[test['pod_photo'] == 'no photo', 'Không có hình ảnh POD'] = 1
+      test = test.rename(columns={'Thời gian ghi nhận fail attempt phải trước 10PM' : 'Fail attempt sau 10PM',
+      'Lịch sử tối thiểu 3 cuộc gọi': 'Lịch sử tối thiểu 3 cuộc gọi ra',
+      'Thời gian giữa mỗi cuộc gọi tối thiểu 1 phút' : 'Thời gian giữa mỗi cuộc gọi tối thiểu 1p',
+      'Thời gian đổ chuông >10s trong trường hợp khách không nghe máy' : 'Tối thiểu 3 cuộc gọi với thời gian đổ chuông >10s trong trường hợp khách không nghe máy',
+      'no_call_log_aloninja' : 'Không có cuộc gọi tiêu chuẩn',
+      'No Record' : 'Không có cuộc gọi thành công'}, errors='ignore').dropna(how='all', axis=1).drop(columns=['Unnamed: 0','Cuộc gọi phải phát sinh trước 8PM'], errors='ignore')
+    test.to_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/Report BI Tool/Pre_processed data/{}.csv'.format(test['attempt_date'].unique()[0]), index=False)
+    print('Done File: {}\n'.format(test['attempt_date'].unique()[0]))
+    printProgressBar(j + 1, len(url), prefix = 'Progress:', suffix = 'Complete')
 
 def read_folder_pod_resultQA_in_month(str_time_from, str_time_to):
   # Get data file names
@@ -80,8 +111,17 @@ def read_folder_pod_resultQA_in_month(str_time_from, str_time_to):
   big_frame.info()
   return big_frame
 
+def driver_finder(x):
+    if 'NEXT' in x.upper(): return 'fulltime'
+    elif 'FRLA' in x.upper(): return 'freelancer'
+    elif('AGAR' in x.upper()) | (
+          '518-FRLA' in x.upper()) | (
+            'XDOCT' in x.upper()) | (
+              'XDOCK' in x.upper()) | (
+                '936-TSS' in x.upper()) | (
+                  'GRAB' in x.upper()) : return '3PLs'
+    else: return 'others'
 
-# module:
 def get_first_attempt_date(x):
   try:
     x = x.drop(columns='first_attempt_date')
@@ -99,11 +139,25 @@ def key_shipper(x):
 
 def pre_processing(x):
   print('Preprocessing:...')
+
+  # drop columns
+  print('Drop columns:...')
   x.drop(columns=['Unnamed: 0',  'Cuộc gọi phải phát sinh trước 8PM', 'first_attempt_date'], inplace=True, errors='ignore')
-  x = x.sort_values(['attempt_datetime'])
-  x = x.dropna(how='all', axis=1).dropna(how='all', axis=0) 
-  # x = x.drop_duplicates(subset=['order_id','waypoint_id'], keep='last')
+  
+  # convert to datetime
+  print('Convert to datetime:...')
   x.attempt_datetime = pd.to_datetime(x.attempt_datetime)
+
+  # sort by attempt_datetime
+  print('Sort by attempt_datetime:...')
+  x = x.sort_values(['attempt_datetime'])
+
+  # drop na
+  print('Drop na:...')
+  x = x.dropna(how='all', axis=1).dropna(how='all', axis=0) 
+  
+  # conver int to float
+  print('Convert int to float:...')
   x[['Fail attempt sau 10PM',
       'Lịch sử tối thiểu 3 cuộc gọi ra',
       'Thời gian giữa mỗi cuộc gọi tối thiểu 1p',
@@ -119,63 +173,34 @@ def pre_processing(x):
       'Không có cuộc gọi thành công',
       'Không có cuộc gọi tiêu chuẩn',
       'Không có hình ảnh POD']].replace('-', 0).astype('float64')
-  x['attempt_datetime'] = pd.to_datetime(x['attempt_datetime'])
+
+  
+  # convert to int
+  print('Convert to int:...')
   x[['hub_id', 'order_id', 'waypoint_id']] = x[['hub_id', 'order_id', 'waypoint_id']].astype('int64')
+  
+  # fillna
+  print('Fillna:...')
   x['count_call_log'] = x['count_call_log'].fillna(0)
+  
+  # driver type finder
+  print('Driver type finder:...')
   x['driver_type'] =  x.driver_name.apply(driver_finder)
-  x =  x.dropna(how='all', axis=1).dropna(how='all', axis=0)
+
+  # no call log aloninja => fake fail
+  print('No call log aloninja => fake fail:...')
+  x.loc[x['result'] == 'no_call_log_aloninja', 'result'] = 'fake_fail'
+
+  # key shipper
+  print('Key shipper:...')
   x = key_shipper(x)
+
+  # first attempt date
+  print('First attempt date:...')
   x = get_first_attempt_date(x)
 
   print('#end')
   return x
-
-
-# Phase1: reading data
-def reading_last_7_day():
-  url = [
-  'https://docs.google.com/spreadsheets/d/11R3RKcyleeHDQPr2y3QpiOLReyc5_T8h2DNwS2fEYlA/edit#gid=0', ## thu 2
-  'https://docs.google.com/spreadsheets/d/1uKSr4flvsSvejRHPid1Ja718Ozl9XFXZAuxi2mVYbKI/edit#gid=0', ## thu3
-  'https://docs.google.com/spreadsheets/d/1XEXt04xtTfsdX3D0rLRriO2XpOxDLI93j9DX2YW1Fys/edit#gid=0', ## thu 4
-  'https://docs.google.com/spreadsheets/d/1U9PeYtVqxQOjl5za9UfxuSZmcKC3U_Z3Y9Ym1kxMhyM/edit#gid=0', ## Thu 5
-  'https://docs.google.com/spreadsheets/d/1Q-igQBq0CnR14PWokk4GZcOn3iJ7RboUKFSp6bMiOcg/edit#gid=0', ## Thu 6
-  'https://docs.google.com/spreadsheets/d/1kPl5-R6FpuRLiNvVmicSQCMYorXqWkUx1V9Frdj8_Ig/edit#gid=0',  ## thu 7
-  'https://docs.google.com/spreadsheets/d/1Z7wGCT4Sh8mQl69nSMZxDuMbbaWBEbWewlWQr_xm9T0/edit', ## cn 
-
-  ]
-
-  for j, i in enumerate(url):
-    printProgressBar(j + 1, len(url), prefix = 'Progress:', suffix = 'Complete')
-    test = pd.read_csv('https://docs.google.com/spreadsheets/d/' + 
-                    str(i.split("d/")[1].split("/e")[0]) +
-                  '/export?gid=0&format=csv').drop_duplicates(subset=['order_id', 'waypoint_id', 'waypoint_photo_id'], keep='last')
-    if pd.to_datetime(test['attempt_date'].unique()[0]) <= pd.Timestamp('2022-11-11'):
-      test['no_call_log_aloninja'] = 0
-      test['Không có hình ảnh POD'] = 0
-      test.loc[test['count_call_log'] == 0, 'no_call_log_aloninja'] = 1
-      test.loc[test['pod_photo'] == 'no photo', 'Không có hình ảnh POD'] = 1
-      test = test.rename(columns={'Thời gian ghi nhận fail attempt phải trước 10PM' : 'Fail attempt sau 10PM',
-      'Lịch sử tối thiểu 3 cuộc gọi': 'Lịch sử tối thiểu 3 cuộc gọi ra',
-      'Thời gian giữa mỗi cuộc gọi tối thiểu 1 phút' : 'Thời gian giữa mỗi cuộc gọi tối thiểu 1p',
-      'Thời gian đổ chuông >10s trong trường hợp khách không nghe máy' : 'Tối thiểu 3 cuộc gọi với thời gian đổ chuông >10s trong trường hợp khách không nghe máy',
-      'no_call_log_aloninja' : 'Không có cuộc gọi tiêu chuẩn',
-      'No Record' : 'Không có cuộc gọi thành công'}, errors='ignore').dropna(how='all', axis=1).drop(columns=['Unnamed: 0','Cuộc gọi phải phát sinh trước 8PM'], errors='ignore')
-    test.to_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/Report BI Tool/Pre_processed data/{}.csv'.format(test['attempt_date'].unique()[0]), index=False)
-    print('Done File: {}'.format(test['attempt_date'].unique()[0]))
-
-    
-      
-
-# Phase 2: pre-processing, dispute
-def driver_finder(x):
-    if 'NEXT' in x: return 'fulltime'
-    elif 'FRLA' in x: return 'freelancer'
-    elif( 'FTS' in x) | ('AGAR' in x) | ('189-FRLA' in x) | ('518-FRLA' in x) | ('XDOCT' in x) | ('TSS' in x) | ('GRAB' in x) | ('RAGA' in x) |('AHA' in x) : return '3PLs'
-    else: return 'others'
-
-
-def get_disputetime():
-    return (dt.datetime.now() - dt.timedelta(days=5)).date()
 
 def final_dispute(x):
   ## Disputing
@@ -185,13 +210,14 @@ def final_dispute(x):
   x['corrected_dispute'] = 0
   x['affected_by_mass_bug'] = 0
   x['affected_by_discreting_bug'] = 0
+  
   url = [
     'https://docs.google.com/spreadsheets/d/1i1Rha9Qg1qZ9sGI0-ddX9QBlO6Jg9URy2tm62Fu3X20/edit#gid=1966091300',
     'https://docs.google.com/spreadsheets/d/14J704NXH8hKJ4XWmmoGWEKozA66lJhui1HIaSVsAacw/edit#gid=1409944538',
     'https://docs.google.com/spreadsheets/d/1tcc9oOKLX7u5iVksTXVaG421KEDSLDhrK2IB8BrS-4w/edit#gid=1518203630',
     'https://docs.google.com/spreadsheets/d/1P0ohdLCGGvk037IHEFeiGvvc7l2bku5HIYCSgLT4i4o/edit#gid=419800374',
     'https://docs.google.com/spreadsheets/d/1TG97G9-h5VwfnvLwTWPfK9myq41galjDvZmCcmPTE74/edit#gid=1171452712',
-    'https://docs.google.com/spreadsheets/d/1ZU_M3haDS-r2bQ-Y2II4rSOhtdkV96DMEK1ua4BopY8/edit?usp=sharing'
+    'https://docs.google.com/spreadsheets/d/1ZU_M3haDS-r2bQ-Y2II4rSOhtdkV96DMEK1ua4BopY8/edit#gid=0'
 
   ]
 
