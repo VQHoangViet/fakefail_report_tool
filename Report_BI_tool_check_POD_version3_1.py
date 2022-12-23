@@ -17,6 +17,7 @@ import seaborn as sns
 import plotly.express as px
 import plotly.graph_objects as go
 import plotly.figure_factory as ff
+import shutil
 from plotly.subplots import make_subplots
 import warnings
 warnings.filterwarnings('ignore')
@@ -26,7 +27,7 @@ auth.authenticate_user()
 drive.mount('/content/drive', force_remount=True)
 
 # print bar progress bar in colaboratory
-def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '█', printEnd = "\r"):
+def printProgressBar (iteration, total, prefix = '', suffix = '', usepercent = True, decimals = 1, fill = '█'):
     """
     Call in a loop to create terminal progress bar
     @params:
@@ -34,19 +35,27 @@ def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, 
         total       - Required  : total iterations (Int)
         prefix      - Optional  : prefix string (Str)
         suffix      - Optional  : suffix string (Str)
-        decimals    - Optional  : positive number of decimals in percent complete (Int)
+        usepercent  - Optoinal  : display percentage (Bool)
+        decimals    - Optional  : positive number of decimals in percent complete (Int), ignored if usepercent = False
         length      - Optional  : character length of bar (Int)
         fill        - Optional  : bar fill character (Str)
-        printEnd    - Optional  : end character (e.g. "") (Str)
-
     """
-    percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
+    # length is calculated by terminal width
+    twx, twy = shutil.get_terminal_size()
+    length = twx - 1 - len(prefix) - len(suffix) -4
+    if usepercent:
+        length = length - 6
     filledLength = int(length * iteration // total)
     bar = fill * filledLength + '-' * (length - filledLength)
-    print(f'\r{prefix} |{bar}| {percent}% {suffix}', end = printEnd)
+    # process percent
+    if usepercent:
+        percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
+        print('\r%s |%s| %s%% %s' % (prefix, bar, percent, suffix), end='', flush=True)
+    else:
+        print('\r%s |%s| %s' % (prefix, bar, suffix), end='', flush=True)
     # Print New Line on Complete
-    if iteration == total: 
-        print()
+    if iteration == total:
+        print(flush=True)
 
 
 # module:
@@ -143,11 +152,11 @@ def read_folder_pod_resultQA_in_month(str_time_from, str_time_to):
   needed_df = source_df.loc[ (source_df.date >= pd.Timestamp(str_time_from)) & (source_df.date <= pd.Timestamp(str_time_to))] # select continually update date rang
   # get data frame
   dfs = []
-  for filename in needed_df['filename']:
+  for i, filename in enumerate(needed_df['filename']):
     # append to list
     dfs.append(pd.read_csv(filename))
     # print progressBar to see the progress
-    printProgressBar(needed_df['filename'].tolist().index(filename) + 1, len(needed_df['filename'].tolist()), prefix = 'Progress:', suffix = 'Complete', length = 50)
+    printProgressBar(i + 1, len(needed_df['filename'].tolist()), prefix = 'Progress:', suffix = 'Complete')
   # Concatenate all data into one DataFrame
   big_frame = pd.concat(dfs, ignore_index=True)
   big_frame.info()
