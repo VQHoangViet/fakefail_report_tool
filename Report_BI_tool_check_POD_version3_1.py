@@ -20,13 +20,9 @@ import plotly.figure_factory as ff
 from plotly.subplots import make_subplots
 
 
-drive.mount('/content/drive', force_remount=True)
 pd.set_option('display.max_columns', None)
 auth.authenticate_user()
 
-# building plotly dashboard
-import plotly.io as pio
-pio.renderers.default = 'colab'
 
 # print bar progress bar in colaboratory
 def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '█', printEnd = "\r"):
