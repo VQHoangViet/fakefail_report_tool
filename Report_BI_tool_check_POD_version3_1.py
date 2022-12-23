@@ -139,15 +139,26 @@ def reading_last_7_day():
       
 
 def read_folder_pod_resultQA_in_month(str_time_from, str_time_to):
-  path = '/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/Report BI Tool/POD Result QA/'
-  list_file = os.listdir(path)
-  list_file = [i for i in list_file if (i.split('.')[0] >= str_time_from) & (i.split('.')[0] <= str_time_to)]
-  list_file.sort()
-  df = pd.DataFrame()
-  for i in list_file:
-    df = df.append(pd.read_csv  (path + i))
-  return df
-
+  # Get data file names
+  mypath = '/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/Report BI Tool/Pre_processed data'
+  source_df = pd.DataFrame({
+    'filename': [mypath + f for f in listdir(mypath) if (isfile(join(mypath, f)) & (os.path.splitext(os.path.basename(f))[1] == '.csv'))],
+    'date' : pd.to_datetime(pd.Series([item.replace(".csv", "") for item in [f for f in listdir(mypath) if (isfile(join(mypath, f)) & (os.path.splitext(os.path.basename(f))[1] == '.csv'))]]))
+  })
+  needed_df = source_df.loc[ (source_df.date >= pd.Timestamp(str_time_from)) & (source_df.date <= pd.Timestamp(str_time_to))] # select continually update date rang
+  # get data frame
+  dfs = []
+  for filename in needed_df['filename']:
+    # print filename
+    print(filename)
+    # read file
+    renamed = pd.read_csv(filename)
+    # append to list
+    dfs.append(renamed)
+  # Concatenate all data into one DataFrame
+  big_frame = pd.concat(dfs, ignore_index=True)
+  big_frame.info()
+  return big_frame
 
 # Phase 2: pre-processing, dispute
 def driver_finder(x):
