@@ -144,10 +144,11 @@ def reading_last_7_day():
 
   ]
 
-  for i in url:
+  for j, i in enumerate(url):
     test = pd.read_csv('https://docs.google.com/spreadsheets/d/' + 
                     str(i.split("d/")[1].split("/e")[0]) +
                   '/export?gid=0&format=csv').drop_duplicates(subset=['order_id', 'waypoint_id', 'waypoint_photo_id'], keep='last')
+    printProgressBar(j + 1, len(url), prefix = 'Progress:', suffix = 'Complete', length = 50)
     if pd.to_datetime(test['attempt_date'].unique()[0]) <= pd.Timestamp('2022-11-11'):
       test['no_call_log_aloninja'] = 0
       test['Không có hình ảnh POD'] = 0
@@ -456,4 +457,4 @@ def read_pipeline(url_agg:str, str_time_from_:str, str_time_to_:str, split_from_
   # Phase 5: Exporting
   export_final_driver_file(final_driver)
   export_final_hub_file(final_hub)
-  return df, final_driver,reason
+  return df, final_driver, reason
