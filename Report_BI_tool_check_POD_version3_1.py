@@ -22,7 +22,7 @@ from plotly.subplots import make_subplots
 
 pd.set_option('display.max_columns', None)
 auth.authenticate_user()
-
+drive.mount('/content/drive', force_remount=True)
 
 # print bar progress bar in colaboratory
 def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '█', printEnd = "\r"):
@@ -143,6 +143,7 @@ def read_folder_pod_resultQA_in_month(str_time_from, str_time_to):
   # get data frame
   dfs = []
   for filename in needed_df['filename']:
+    printProgressBar(needed_df['filename'].tolist().index(filename) + 1, len(needed_df['filename']), prefix = 'Progress:', suffix = 'Complete', length = 50)
     # append to list
     dfs.append(pd.read_csv(filename))
   # Concatenate all data into one DataFrame
