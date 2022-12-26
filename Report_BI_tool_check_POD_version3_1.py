@@ -23,6 +23,18 @@ from plotly.subplots import make_subplots
 
 warnings.filterwarnings('ignore')
 
+
+# Print big heart in colaboratory
+def print_heart():
+    print('''
+    ██╗  ██╗ █████╗ ███████╗████████╗██╗  ██╗███████╗██████╗ 
+    ██║  ██║██╔══██╗██╔════╝╚══██╔══╝██║  ██║██╔════╝██╔══██╗
+    ███████║███████║███████╗   ██║   ███████║█████╗  ██████╔╝
+    ██╔══██║██╔══██║╚════██║   ██║   ██╔══██║██╔══╝  ██╔══██╗
+    ██║  ██║██║  ██║███████║   ██║   ██║  ██║███████╗██║  ██║
+    ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝   ╚═╝   ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝
+    ''')
+
 pd.set_option('display.max_columns', None)
 auth.authenticate_user()
 drive.mount('/content/drive', force_remount=True)
@@ -87,8 +99,8 @@ def reading_last_7_day():
       'no_call_log_aloninja' : 'Không có cuộc gọi tiêu chuẩn',
       'No Record' : 'Không có cuộc gọi thành công'}, errors='ignore').dropna(how='all', axis=1).drop(columns=['Unnamed: 0','Cuộc gọi phải phát sinh trước 8PM'], errors='ignore')
     test.to_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/Report BI Tool/Pre_processed data/{}.csv'.format(test['attempt_date'].unique()[0]), index=False)
-    print('Done File: {}\n'.format(test['attempt_date'].unique()[0]))
     printProgressBar(j + 1, len(url), prefix = 'Progress:', suffix = 'Complete')
+    print('Done File: {}\n'.format(test['attempt_date'].unique()[0]))
 
 def read_folder_pod_resultQA_in_month(str_time_from, str_time_to):
   # Get data file names
@@ -187,9 +199,6 @@ def pre_processing(x):
   print('Driver type finder:...')
   x['driver_type'] =  x.driver_name.apply(driver_finder)
 
-  # no call log aloninja => fake fail
-  print('No call log aloninja => fake fail:...')
-  x.loc[x['result'] == 'no_call_log_aloninja', 'result'] = 'fake_fail'
 
   # key shipper
   print('Key shipper:...')
@@ -202,11 +211,41 @@ def pre_processing(x):
   print('#end')
   return x
 
-def final_dispute(x):
+def read_manual_check(x):
+
+  # read list of POD gsheet url file
+  creds, _ = default()
+  gc = gspread.authorize(creds)
+  temp = gc.open_by_url('https://docs.google.com/spreadsheets/d/1_i8lKyYwRKE05QlIWqyv83vld6J4LRb8osfSM5_qL38/edit#gid=0').worksheet("Sheet1").get_as_df()
+
+  # read link in file
+  url = temp['url'].unique()
+
+  # read file
+  df = pd.DataFrame()
+  for i in url:
+    temp = pd.open_by_url(i).worksheet("Sheet1").get_as_df()[['Waypoint ID', 'FinalQualified/ Unqualified2']]
+    df = pd.concat([df, temp], ignore_index=True)
+
+  # create POD_sample_flag column
+  x['POD_sample_flag'] = 0
+
+  # create Final Unqualified POD column
+  x['Final_Unqualified_POD_sample'] = 0
+  
+  # set POD_sample = 1 if waypoint_id in list
+  x.loc[x['waypoint_id'].isin(df['Waypoint ID'].unique()), 'POD_sample_flag'] = 1
+
+  # set POD_sample = 1 if FinalQualified/ Unqualified2 = Unqualified
+  x.loc[x.waypoint_id.isin(df.loc[df['FinalQualified/ Unqualified2'] == 'Unqualified', 'Waypoint ID'].unique()), 'Final_Unqualified_POD_sample'] = 1
+
+  return x
+
+def dispute_phase(x):
+  print('Final dispute:...') 
   ## Disputing
   x['disputing'] = 0
   x['attempt_datetime'] = pd.to_datetime(x['attempt_datetime'])
-  x['final_result'] = 0
   x['corrected_dispute'] = 0
   x['affected_by_mass_bug'] = 0
   x['affected_by_discreting_bug'] = 0
@@ -222,12 +261,13 @@ def final_dispute(x):
   ]
 
   disputing = pd.DataFrame()
-  for i in url:
+  for j , i in enumerate(url):
     # holding temp data
     print(i)
     creds, _ = default()
     gc = gspread.authorize(creds)
     temp = gc.open_by_url(i).worksheet("Detail")
+    printProgressBar(j + 1, len(url), prefix = 'Progress:', suffix = 'Complete', length = 50)
     # Convert to a DataFrame and render.
     disputing = pd.concat([disputing, get_as_dataframe(temp, evaluate_formulas=True)[['waypoint_id', 'Status']]])
 
@@ -264,28 +304,36 @@ def final_dispute(x):
 
   # disputing:
   x.loc[x['waypoint_id'].isin(disputing['waypoint_id']), 'disputing'] = 1
-
-
-  # final:
-  print('Bug case: ', x[ (x['fully_driver_result'] == 'fake_fail') & (x['affected_by_discreting_bug'] == 0) & ((x['affected_by_mass_bug'] == 0) & (x['corrected_dispute'] == 0)) ].shape)
-  x.loc[ (x['fully_driver_result'] == 'fake_fail') & (x['affected_by_discreting_bug'] == 0) & ((x['affected_by_mass_bug'] == 0) & (x['corrected_dispute'] == 0))   , 'final_result'] = 1
-
   ## Nocode here
   print('Done Dispute!')
   return pd.DataFrame(x)
 
+def final_result(x):
+    x['final_result'] = 0
+
+    # flag by bug or disputation
+    x.loc[(x['fully_driver_result'] == 'fake_fail') & (x['affected_by_discreting_bug'] == 0) & ((x['affected_by_mass_bug'] == 0) & (x['corrected_dispute'] == 0))   , 'final_result'] = 1
+
+    # flag by POD
+    x.loc[(x['Final_Unqualified_POD_sample'] == 1) &  (x['corrected_dispute'] == 0)  & (x['affected_by_discreting_bug'] == 0) & (x['affected_by_mass_bug'] == 0) , 'final_result'] = 1
+    return x
+
 def spliting_file(x, split_from, split_to):
   x['attempt_date'] = pd.to_datetime(x['attempt_date']).dt.date
-  for i in x.loc[(x['attempt_date'] >= pd.Timestamp(split_from)) & (x['attempt_date'] <= pd.Timestamp(split_to)), 'attempt_date'].unique():
+  for j, i in enumerate(x.loc[(x['attempt_date'] >= pd.Timestamp(split_from)) & (x['attempt_date'] <= pd.Timestamp(split_to)), 'attempt_date'].unique()):
     x[x['attempt_date'] == i].to_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/Report BI Tool/Pre_processed data/'+str(i)+'.csv', index=False)
     print("Done file: " + str(i))
-  print('DONE SLITING')
+    printProgressBar(j+1, len(x.loc[(x['attempt_date'] >= pd.Timestamp(split_from)) & (x['attempt_date'] <= pd.Timestamp(split_to)), 'attempt_date'].unique()), prefix = 'Progress:', suffix = 'Complete', length = 50)
 
 
 def sales_channel(x):
-  print(x.info())
-  x.loc[(~x['sales_channel'].isna()) & (x['fully_driver_result']=='fake_fail')].groupby(['first_attempt_date','region', 'sales_channel'])['tracking_id'].nunique().reset_index().to_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/FF Oct Final/sales_channels_ffcase ' + str((pd.to_datetime(x['first_attempt_date']).dt.year.max())) + "_" + str(pd.to_datetime(x['first_attempt_date']).dt.month.min()) +'_to_'+ str((pd.to_datetime(x['first_attempt_date']).dt.year.max())) + "_" + str(pd.to_datetime(x['first_attempt_date']).dt.month.max()) +'.csv', index = False)
-  print('Done sales_channel~~~~~~~~~~~~~~')
+  # sales_channel
+  print('Start sales_channel...')
+  x.loc[(~x['sales_channel'].isna()) & (x['fully_driver_result']=='fake_fail')] \
+    .groupby(['first_attempt_date','region', 'sales_channel'])['tracking_id']\
+      .nunique().\
+        reset_index().\
+          to_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/FF Oct Final/sales_channels_ffcase ' + str((pd.to_datetime(x['first_attempt_date']).dt.year.max())) + "_" + str(pd.to_datetime(x['first_attempt_date']).dt.month.min()) +'_to_'+ str((pd.to_datetime(x['first_attempt_date']).dt.year.max())) + "_" + str(pd.to_datetime(x['first_attempt_date']).dt.month.max()) +'.csv', index = False)
 
 
 
@@ -453,7 +501,7 @@ def read_pipeline(url_agg:str, str_time_from_:str, str_time_to_:str, split_from_
   sales_channel(df)
   print('Date collected: ', df['attempt_date'].unique())
   print('Phase 2: Disputing, and Groupby Driver counting' + '-'*100)
-  df = final_dispute(df)
+  df = dispute_phase(df)
   spliting_file(df, split_from=split_from_, split_to=split_to_)
   
 
@@ -467,8 +515,7 @@ def read_pipeline(url_agg:str, str_time_from_:str, str_time_to_:str, split_from_
   print("Number of Unique Driver_type: ", df['driver_type'].value_counts())
   print("Number of Uni Hub name: ", df['hub_name'].nunique())
   print("Shape: ", df.shape)
-  print(df.info())
-  print('Phase 3: Mapping' + '-'*100)
+  print(df['fully_driver_result'].value_counts())
   driver, hub = mapping_phase(df, url_agg)
   reason =  export_final_reason_file(df.groupby(['first_attempt_date', 'reason']).apply(reason_fail_agg).reset_index())
   
