@@ -24,16 +24,8 @@ from plotly.subplots import make_subplots
 warnings.filterwarnings('ignore')
 
 
-# Print big heart in colaboratory
 
-print('''
-██╗  ██╗ █████╗ ███████╗████████╗██╗  ██╗███████╗██████╗ 
-██║  ██║██╔══██╗██╔════╝╚══██╔══╝██║  ██║██╔════╝██╔══██╗
-███████║███████║███████╗   ██║   ███████║█████╗  ██████╔╝
-██╔══██║██╔══██║╚════██║   ██║   ██╔══██║██╔══╝  ██╔══██╗
-██║  ██║██║  ██║███████║   ██║   ██║  ██║███████╗██║  ██║
-╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝   ╚═╝   ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝
-''')
+
 
 pd.set_option('display.max_columns', None)
 auth.authenticate_user()
@@ -519,7 +511,14 @@ def export_final_sales_channel_file(final):
 ### ___________________________________________________ Main ____________________________________________________________  
 def read_pipeline(url_agg:str, str_time_from_:str, str_time_to_:str, split_from_:str, split_to_:str):
   print('hello Ninja !!!' + str(pd.Timestamp.now()))
-  
+  print('''
+██╗  ██╗ █████╗ ███████╗████████╗██╗  ██╗███████╗██████╗ 
+██║  ██║██╔══██╗██╔════╝╚══██╔══╝██║  ██║██╔════╝██╔══██╗
+███████║███████║███████╗   ██║   ███████║█████╗  ██████╔╝
+██╔══██║██╔══██║╚════██║   ██║   ██╔══██║██╔══╝  ██╔══██╗
+██║  ██║██║  ██║███████║   ██║   ██║  ██║███████╗██║  ██║
+╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝   ╚═╝   ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝
+''')
   # Phase 1: Reading Data and preprocessing
   print('Phase 1: Reading Data and preprocessing' + '-'*100)
   big_frame = read_folder_pod_resultQA_in_month(str_time_from_, str_time_to_)
