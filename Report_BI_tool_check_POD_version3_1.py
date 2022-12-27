@@ -254,24 +254,24 @@ def dispute_phase(x):
   x['affected_by_discreting_bug'] = 0
   
   url = [
-    'https://drive.google.com/file/d/1v6gOknShQtj44RlHnn2R8-vMOcJ2E32k/view?usp=share_link',
-    'https://drive.google.com/file/d/17a5hDYZsW_HbwTCgPG48EhrWfIHTH_KW/view?usp=share_link',
-    'https://drive.google.com/file/d/1o5QGdt6NV24zrXSEqkSwqJQxvbHoNtfj/view?usp=share_link',
-    'https://drive.google.com/file/d/1QB1fZ-D6C1-p9bf4cml8B5zdQ9m5p1NU/view?usp=share_link',
-    'https://drive.google.com/file/d/16gAbIjTTIqtB7HN_wgLeCDOmbdV5R74b/view?usp=share_link',
-    'https://drive.google.com/file/d/1zBHvOJLHJSeoNyHghF4om-LPDnYcPVtx/view?usp=share_link'
+    'https://docs.google.com/spreadsheets/d/1i1Rha9Qg1qZ9sGI0-ddX9QBlO6Jg9URy2tm62Fu3X20/edit#gid=1966091300',
+    'https://docs.google.com/spreadsheets/d/14J704NXH8hKJ4XWmmoGWEKozA66lJhui1HIaSVsAacw/edit#gid=1409944538',
+    'https://docs.google.com/spreadsheets/d/1tcc9oOKLX7u5iVksTXVaG421KEDSLDhrK2IB8BrS-4w/edit#gid=1518203630',
+    'https://docs.google.com/spreadsheets/d/1P0ohdLCGGvk037IHEFeiGvvc7l2bku5HIYCSgLT4i4o/edit#gid=419800374',
+    'https://docs.google.com/spreadsheets/d/1TG97G9-h5VwfnvLwTWPfK9myq41galjDvZmCcmPTE74/edit#gid=1171452712',
+    'https://docs.google.com/spreadsheets/d/1ZU_M3haDS-r2bQ-Y2II4rSOhtdkV96DMEK1ua4BopY8/edit#gid=0'
 
   ]
 
   disputing = pd.DataFrame()
   for j , i in enumerate(url):
     # holding temp data
-    file_id=i.split('/')[-2]
-    dwn_url='https://drive.google.com/uc?id=' + file_id
-    temp = pd.read_csv(dwn_url, on_bad_lines='skip')[['waypoint_id', 'Status']]
-    # Convert to a DataFrame and render.
-    disputing = pd.concat([disputing, temp])
+    creds, _ = default()
+    gc = gspread.authorize(creds)
+    temp = gc.open_by_url(i).worksheet("Detail")
     printProgressBar(j + 1, len(url), prefix = 'Progress:', suffix = 'Complete link:' + i)
+    # Convert to a DataFrame and render.
+    disputing = pd.concat([disputing, get_as_dataframe(temp, evaluate_formulas=True)[['waypoint_id', 'Status']]])
 
 
   disputing =  disputing.dropna(how='all', axis=1).dropna(how='all', axis=0).drop_duplicates(subset=['waypoint_id'])
