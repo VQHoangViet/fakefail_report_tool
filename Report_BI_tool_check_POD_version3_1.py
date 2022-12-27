@@ -261,7 +261,7 @@ def dispute_phase(x):
     creds, _ = default()
     gc = gspread.authorize(creds)
     temp = gc.open_by_url(i).worksheet("Detail")
-    printProgressBar(j + 1, len(url), prefix = 'Progress:', suffix = 'Complete', length = 50)
+    printProgressBar(j + 1, len(url), prefix = 'Progress:', suffix = 'Complete')
     # Convert to a DataFrame and render.
     disputing = pd.concat([disputing, get_as_dataframe(temp, evaluate_formulas=True)[['waypoint_id', 'Status']]])
 
