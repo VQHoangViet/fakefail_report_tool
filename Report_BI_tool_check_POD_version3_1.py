@@ -416,12 +416,12 @@ def mapping_phase(x, url):
   
   # get volume_of_ontime_KPI
   volume_of_ontime_KPI_for_sales_channel = pd.read_csv(url)[['dest_hub_date', 'dest_hub_id', 'dest_hub_name', 'sales_channel', 'volume_of_ontime_KPI' ]]
+  volume_of_ontime_KPI_for_sales_channel['volume_of_ontime_KPI'] = volume_of_ontime_KPI_for_sales_channel['volume_of_ontime_KPI']/2
+  volume_of_ontime_KPI_for_sales_channel.rename(columns={"volume_of_ontime_KPI": 'Total orders reach LM hub' }, inplace=True)
 
 
-  volume_of_ontime_KPI = volume_of_ontime_KPI_for_sales_channel.groupby(['dest_hub_date', 'dest_hub_id', 'dest_hub_name']).sum('volume_of_ontime_KPI').reset_index()
-  volume_of_ontime_KPI['volume_of_ontime_KPI'] = volume_of_ontime_KPI['volume_of_ontime_KPI']/2
+  volume_of_ontime_KPI = volume_of_ontime_KPI_for_sales_channel.groupby(['dest_hub_date', 'dest_hub_id', 'dest_hub_name']).sum('Total orders reach LM hub').reset_index()
   volume_of_ontime_KPI.to_csv('/content/volume_of_ontime_KPI.csv', index=False)
-  volume_of_ontime_KPI.rename(columns={"volume_of_ontime_KPI": 'Total orders reach LM hub' }, inplace=True)
 
   # group by driver_id apply bi_agg
   driver = x.groupby(['driver_id' ,'driver_name', 'driver_type','first_attempt_date', 'hub_id',  'hub_name',	'region']).apply(bi_agg).reset_index() ###
