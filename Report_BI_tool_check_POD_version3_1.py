@@ -216,7 +216,8 @@ def read_POD_manual_check(x):
   # read list of POD gsheet url file
   creds, _ = default()
   gc = gspread.authorize(creds)
-  temp = gc.open_by_url('https://docs.google.com/spreadsheets/d/1_i8lKyYwRKE05QlIWqyv83vld6J4LRb8osfSM5_qL38/edit#gid=0').worksheet("Sheet1").get_as_df()
+  temp = gc.open_by_url('https://docs.google.com/spreadsheets/d/1_i8lKyYwRKE05QlIWqyv83vld6J4LRb8osfSM5_qL38/edit#gid=0').worksheet("Sheet1")
+  temp = get_as_dataframe(temp, evaluate_formulas=True)
 
   # read link in file
   url = temp['url'].unique()
