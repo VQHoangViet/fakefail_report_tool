@@ -433,11 +433,6 @@ def mapping_phase(x, url):
   agg_hub = agg_hub.merge(hub_info, how='left', left_on=['hub_id'], right_on=['ID'],suffixes=('', '_')).drop(columns=['ID', 'Is Deleted', 'Name', 'Province Code', 'Region'])
   agg_sales_channel = agg_sales_channel.merge(hub_info, how='left', left_on=['hub_id'], right_on=['ID'],suffixes=('', '_')).drop(columns=['ID', 'Is Deleted', 'Name', 'Province Code', 'Region'])
 
-  # weeknum
-  agg_driver['weeknum'] = agg_driver['first_attempt_date'].dt.isocalendar().week
-  agg_hub['weeknum'] = agg_hub['first_attempt_date'].dt.isocalendar().week
-  agg_sales_channel['weeknum'] = agg_sales_channel['first_attempt_date'].dt.isocalendar().week
-
 
   return agg_driver, agg_hub, agg_sales_channel
   
