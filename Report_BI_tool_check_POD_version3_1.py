@@ -419,7 +419,7 @@ def mapping_phase(x, url):
 
 
   volume_of_ontime_KPI = volume_of_ontime_KPI_for_sales_channel.groupby(['dest_hub_date', 'dest_hub_id', 'dest_hub_name']).sum('volume_of_ontime_KPI').reset_index()
-  volume_of_ontime_KPI = volume_of_ontime_KPI['volume_of_ontime_KPI']/2
+  volume_of_ontime_KPI['volume_of_ontime_KPI'] = volume_of_ontime_KPI['volume_of_ontime_KPI']/2
   volume_of_ontime_KPI.to_csv('/content/volume_of_ontime_KPI.csv', index=False)
   volume_of_ontime_KPI.rename(columns={"volume_of_ontime_KPI": 'Total orders reach LM hub' }, inplace=True)
 
