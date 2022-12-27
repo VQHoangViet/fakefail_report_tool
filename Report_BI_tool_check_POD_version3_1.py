@@ -268,10 +268,10 @@ def dispute_phase(x):
     # holding temp data
     file_id=i.split('/')[-2]
     dwn_url='https://drive.google.com/uc?id=' + file_id
-    temp = pd.read_csv(dwn_url, on_bad_lines='skip')
-    printProgressBar(j + 1, len(url), prefix = 'Progress:', suffix = 'Complete link:' + i)
+    temp = pd.read_csv(dwn_url, on_bad_lines='skip')[['waypoint_id', 'Status']]
     # Convert to a DataFrame and render.
-    disputing = pd.concat([disputing, get_as_dataframe(temp, evaluate_formulas=True)[['waypoint_id', 'Status']]])
+    disputing = pd.concat([disputing, temp])
+    printProgressBar(j + 1, len(url), prefix = 'Progress:', suffix = 'Complete link:' + i)
 
 
   disputing =  disputing.dropna(how='all', axis=1).dropna(how='all', axis=0).drop_duplicates(subset=['waypoint_id'])
