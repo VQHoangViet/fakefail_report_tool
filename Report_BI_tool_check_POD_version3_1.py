@@ -401,8 +401,11 @@ def bi_agg(x):
         'correted_by_disputing_orders':  x[(x['corrected_dispute']==1) & (x['fully_driver_result']=='fake_fail')]['order_id'].nunique(),
         'total_orders_affected_by_mass_bug': x[(x['affected_by_mass_bug']==1) & (x['fully_driver_result']=='fake_fail')]['order_id'].nunique(),
         'total_orders_affected_by_discreting_bug': x[(x['affected_by_discreting_bug']==1) & (x['fully_driver_result']=='fake_fail')]['order_id'].nunique(),
+        'total_POD_sample_orders_flag': x[x['POD_sample_flag']==1]['order_id'].nunique(),
+        'total_POD_sample_orders_flag_fake_fail': x[(x['Final_Unqualified_POD_sample']==1)]['order_id'].nunique(),
         'real_FF_orders': x[(x['final_result']==1)]['order_id'].nunique(),
         'Final_Fake_fail_tracking_id_list': x[(x['final_result']==1)]['tracking_id'].unique()
+        
         }
     return pd.Series(names)
 
