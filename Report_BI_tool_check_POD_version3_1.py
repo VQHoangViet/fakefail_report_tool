@@ -548,7 +548,6 @@ def read_pipeline(url_agg:str, str_time_from_:str, str_time_to_:str, split_from_
   # Phase 3: Mapping
   clear_output()
   print('Phase 3: Mapping' + '-'*100)
-  print(df['attempt_date'].unique())
   print("Number of Unique Driver_name: ", df['driver_name'].nunique())
   print("Number of Unique Driver_type: ", df['driver_type'].value_counts())
   print("Number of Uni Hub name: ", df['hub_name'].nunique())
