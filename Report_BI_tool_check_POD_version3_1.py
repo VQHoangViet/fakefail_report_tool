@@ -191,7 +191,16 @@ def pre_processing(x):
   print('Driver type finder:...')
   x['driver_type'] =  x.driver_name.apply(driver_finder)
 
+  # if fully_driver_result not exist, then create it and if it nan then fill it with result
 
+  print('If fully_driver_result not exist, then create it:...')
+  if 'fully_driver_result' not in x.columns:
+    x['fully_driver_result'] = x['result']
+  print('If fully_driver_result nan then fill it with result:...')
+  x['fully_driver_result'] = x['fully_driver_result'].fillna(x['result'])
+  
+
+  
   # key shipper
   print('Key shipper:...')
   x = key_shipper(x)
@@ -443,16 +452,9 @@ def compute_phase(x):
   max_total_order = raw_data.groupby(['hub_id', 'first_attempt_date'])[['Total orders reach LM hub']].transform(lambda x: x.max())
   raw_data['original_FF_index'] = (raw_data['total_fake_fail_orders']/max_total_order['Total orders reach LM hub']).fillna(0)
   raw_data['actual_fakefail_index'] = (raw_data['real_FF_orders']/raw_data['Total orders reach LM hub']).fillna(0)
-
-  # visualizing time series for actual_fakefail_index with seaborn
-  fig, ax = plt.subplots(figsize=(20, 10))
-  sns.lineplot(x='first_attempt_date', y='actual_fakefail_index', data=raw_data)
-  sns.lineplot(x='first_attempt_date', y='original_FF_index', data=raw_data)
-  plt.show()
-
-
   
   return raw_data
+
 
 # Final: exporting
 def export_final_driver_file(final):
