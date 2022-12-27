@@ -324,8 +324,7 @@ def spliting_file(x, split_from, split_to):
   x['attempt_date'] = pd.to_datetime(x['attempt_date']).dt.date
   for j, i in enumerate(x.loc[(x['attempt_date'] >= pd.Timestamp(split_from)) & (x['attempt_date'] <= pd.Timestamp(split_to)), 'attempt_date'].unique()):
     x[x['attempt_date'] == i].to_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/Report BI Tool/Pre_processed data/'+str(i)+'.csv', index=False)
-    print("Done file: " + str(i))
-    printProgressBar(j+1, len(x.loc[(x['attempt_date'] >= pd.Timestamp(split_from)) & (x['attempt_date'] <= pd.Timestamp(split_to)), 'attempt_date'].unique()), prefix = 'Progress:', suffix = 'Complete')
+    printProgressBar(j+1, len(x.loc[(x['attempt_date'] >= pd.Timestamp(split_from)) & (x['attempt_date'] <= pd.Timestamp(split_to)), 'attempt_date'].unique()), prefix = 'Progress:', suffix = 'Complete file: ' + str(i))
 
 
 def sales_channel_for_OPEX(x):
