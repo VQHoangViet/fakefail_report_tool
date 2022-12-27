@@ -487,18 +487,18 @@ def export_final_hub_file(final):
     final.to_csv('/content/DB_final_hub_data '+ str((pd.to_datetime(final['first_attempt_date']).dt.year.max())) + "_" + str(pd.to_datetime(final['first_attempt_date']).dt.month.max()) +'.csv', index = False)
 
 def export_final_reason_file(x):
-  print('Reason fail: start!')
+  # final reason data
+  final = x.sort_values('first_attempt_date')
 
+  # export final hub data
+  final.to_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/final_data_monthly/final_reason/final_reason_data '+ str((pd.to_datetime(final['first_attempt_date']).dt.year.max())) + "_" + str(pd.to_datetime( final['first_attempt_date']).dt.month.max()) +'.csv', index = False)
+  
+  # dashboard final data
   try:
-    reason = pd.read_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/final_data_monthly/final_reason/reason_fail_agg.csv')
+    final.drop(columns=['attempt_fake_fail_list', 'Final_Fake_fail_tracking_id_list']).to_csv('/content/DB_final_reason_data '+ str((pd.to_datetime(final['first_attempt_date']).dt.year.max())) + "_" + str(pd.to_datetime(final['first_attempt_date']).dt.month.max()) +'.csv', index = False)
   except:
-    reason = pd.DataFrame()
-  x = pd.concat([reason, x]).drop_duplicates(subset=['first_attempt_date', 'reason'],keep='last')
-  x.sort_values('first_attempt_date').to_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/final_data_monthly/reason_fail_agg.csv', index=False)
-  print('Reason fail: end!')
-
-  return x
-
+    pass
+  
 def export_final_sales_channel_file(final):
   # final sales channel data
   final = final.sort_values('first_attempt_date')
