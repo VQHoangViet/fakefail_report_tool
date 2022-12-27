@@ -419,6 +419,8 @@ def mapping_phase(x, url):
 
 
   volume_of_ontime_KPI = volume_of_ontime_KPI_for_sales_channel.groupby(['dest_hub_date', 'dest_hub_id', 'dest_hub_name']).sum('volume_of_ontime_KPI').reset_index()
+  volume_of_ontime_KPI = volume_of_ontime_KPI['volume_of_ontime_KPI']/2
+  volume_of_ontime_KPI.to_csv('/content/volume_of_ontime_KPI.csv', index=False)
   volume_of_ontime_KPI.rename(columns={"volume_of_ontime_KPI": 'Total orders reach LM hub' }, inplace=True)
 
   # group by driver_id apply bi_agg
@@ -498,7 +500,7 @@ def export_final_reason_file(x):
     final.drop(columns=['attempt_fake_fail_list', 'Final_Fake_fail_tracking_id_list']).to_csv('/content/DB_final_reason_data '+ str((pd.to_datetime(final['first_attempt_date']).dt.year.max())) + "_" + str(pd.to_datetime(final['first_attempt_date']).dt.month.max()) +'.csv', index = False)
   except:
     pass
-  
+
 def export_final_sales_channel_file(final):
   # final sales channel data
   final = final.sort_values('first_attempt_date')
@@ -517,6 +519,10 @@ def export_final_sales_channel_file(final):
 
 ### ___________________________________________________ Main ____________________________________________________________  
 def read_pipeline(url_agg:str, str_time_from_:str, str_time_to_:str, split_from_:str, split_to_:str):
+  
+
+
+
   print('hello Ninja !!!' + str(pd.Timestamp.now()))
   print('''
 ██╗  ██╗ █████╗ ███████╗████████╗██╗  ██╗███████╗██████╗ 
