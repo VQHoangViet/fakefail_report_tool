@@ -209,7 +209,7 @@ def read_POD_manual_check(x):
   creds, _ = default()
   gc = gspread.authorize(creds)
   temp = gc.open_by_url('https://docs.google.com/spreadsheets/d/1_i8lKyYwRKE05QlIWqyv83vld6J4LRb8osfSM5_qL38/edit#gid=0').worksheet("Sheet1")
-  temp = get_as_dataframe(temp, evaluate_formulas=True)
+  temp = get_as_dataframe(temp, evaluate_formulas=True).dropna(how='all', axis=1).dropna(how='all', axis=0)
 
   # read link in file
   url = temp['url'].unique()
@@ -217,8 +217,9 @@ def read_POD_manual_check(x):
   # read file
   df = pd.DataFrame()
   for i in url:
+    print(i)
     temp = gc.open_by_url(i).worksheet("New Data Detail")
-    temp = get_as_dataframe(temp, evaluate_formulas=True)[['Waypoint ID', 'FinalQualified/ Unqualified2']]
+    temp = get_as_dataframe(temp, evaluate_formulas=True)[['Waypoint ID', 'FinalQualified/ Unqualified2']].dropna(how='all', axis=1).dropna(how='all', axis=0)
     df = pd.concat([df, temp], ignore_index=True)
 
   # create POD_sample_flag column
