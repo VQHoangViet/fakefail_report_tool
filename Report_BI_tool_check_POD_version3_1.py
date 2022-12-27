@@ -217,7 +217,8 @@ def read_POD_manual_check(x):
   # read file
   df = pd.DataFrame()
   for i in url:
-    temp = pd.open_by_url(i).worksheet("Sheet1").get_as_df()[['Waypoint ID', 'FinalQualified/ Unqualified2']]
+    temp = gc.open_by_url(i).worksheet("New Data Detail")
+    temp = get_as_dataframe(temp, evaluate_formulas=True)[['Waypoint ID', 'FinalQualified/ Unqualified2']]
     df = pd.concat([df, temp], ignore_index=True)
 
   # create POD_sample_flag column
