@@ -415,13 +415,18 @@ def mapping_phase(x, url):
   hub_info = pd.read_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/Dataset/Hubs enriched - hub_info.csv')
   
   # get volume_of_ontime_KPI
-  volume_of_ontime_KPI_for_sales_channel = pd.read_csv(url)[['dest_hub_date', 'dest_hub_id', 'dest_hub_name', 'sales_channel', 'volume_of_ontime_KPI' ]]
-  volume_of_ontime_KPI_for_sales_channel['volume_of_ontime_KPI'] = volume_of_ontime_KPI_for_sales_channel['volume_of_ontime_KPI']/2
-  volume_of_ontime_KPI_for_sales_channel.rename(columns={"volume_of_ontime_KPI": 'Total orders reach LM hub' }, inplace=True)
+  # volume_of_ontime_KPI_for_sales_channel =  pd.read_csv(url)[['dest_hub_date', 'dest_hub_id', 'dest_hub_name', 'sales_channel', 'volume_of_ontime_KPI' ]]
+  # volume_of_ontime_KPI_for_sales_channel['volume_of_ontime_KPI'] = volume_of_ontime_KPI_for_sales_channel['volume_of_ontime_KPI']/2
+  # volume_of_ontime_KPI_for_sales_channel.rename(columns={"volume_of_ontime_KPI": 'Total orders reach LM hub' }, inplace=True)
 
 
-  volume_of_ontime_KPI = volume_of_ontime_KPI_for_sales_channel.groupby(['dest_hub_date', 'dest_hub_id', 'dest_hub_name']).sum('Total orders reach LM hub').reset_index()
-  volume_of_ontime_KPI.to_csv('/content/volume_of_ontime_KPI.csv', index=False)
+  volume_of_ontime_KPI = pd.read_csv(url)[['dest_hub_date', 'dest_hub_id', 'dest_hub_name', 'volume_of_ontime_KPI' ]]
+  volume_of_ontime_KPI.rename(columns={"volume_of_ontime_KPI": 'Total orders reach LM hub' }, inplace=True)
+
+  # to csv by min max time of volume_of_ontime_KPI dataframe
+  volume_of_ontime_KPI.to_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/final_data_monthly/volume_of_ontime_KPI/volume_of_ontime_KPI '+ \
+                              str((pd.to_datetime(volume_of_ontime_KPI['dest_hub_date']).dt.year.min())) + "_" + str(pd.to_datetime(volume_of_ontime_KPI['dest_hub_date']).dt.month.min()) + \
+  + str((pd.to_datetime(volume_of_ontime_KPI['first_attempt_date']).dt.year.max())) + "_" + str(pd.to_datetime(volume_of_ontime_KPI['first_attempt_date']).dt.month.max()) +'.csv', index = False)
 
   # group by driver_id apply bi_agg
   driver = x.groupby(['driver_id' ,'driver_name', 'driver_type','first_attempt_date', 'hub_id',  'hub_name',	'region']).apply(bi_agg).reset_index() ###
@@ -430,25 +435,25 @@ def mapping_phase(x, url):
   hub = x.groupby(['first_attempt_date' ,'hub_id', 'hub_name', 'region']).apply(bi_agg).reset_index()
 
   # group by sales_channel apply bi_agg
-  sales_channel = x.groupby(['first_attempt_date' ,'hub_id', 'hub_name','sales_channel']).apply(bi_agg).reset_index()
+  # sales_channel = x.groupby(['first_attempt_date' ,'hub_id', 'hub_name','sales_channel']).apply(bi_agg).reset_index()
  
   # merge with volume_of_ontime_KPI
   agg_driver = driver.merge(volume_of_ontime_KPI, how='left', left_on=['first_attempt_date','hub_id'], right_on=['dest_hub_date','dest_hub_id'],suffixes=('', '_y'))
   agg_hub = hub.merge(volume_of_ontime_KPI, how='left', left_on=['first_attempt_date','hub_id'], right_on=['dest_hub_date','dest_hub_id'],suffixes=('', '_y'))
-  agg_sales_channel = sales_channel.merge(volume_of_ontime_KPI_for_sales_channel, how='left', left_on=['first_attempt_date','hub_id', 'sales_channel'], right_on=['dest_hub_date','dest_hub_id', 'sales_channel'],suffixes=('', '_y'))
+  # agg_sales_channel = sales_channel.merge(volume_of_ontime_KPI_for_sales_channel, how='left', left_on=['first_attempt_date','hub_id', 'sales_channel'], right_on=['dest_hub_date','dest_hub_id', 'sales_channel'],suffixes=('', '_y'))
 
   # drop columns
   agg_driver.drop(columns=['dest_hub_date',	'dest_hub_id',	'dest_hub_name'], inplace=True)
   agg_hub.drop(columns=['dest_hub_date',	'dest_hub_id',	'dest_hub_name'], inplace=True)
-  agg_sales_channel.drop(columns=['dest_hub_date',	'dest_hub_id',	'dest_hub_name'], inplace=True)
+  # agg_sales_channel.drop(columns=['dest_hub_date',	'dest_hub_id',	'dest_hub_name'], inplace=True)
 
   # merge with hub_info
   agg_driver = agg_driver.merge(hub_info, how='left', left_on=['hub_id'], right_on=['ID'],suffixes=('', '_')).drop(columns=['ID', 'Is Deleted', 'Name', 'Province Code', 'Region'])
   agg_hub = agg_hub.merge(hub_info, how='left', left_on=['hub_id'], right_on=['ID'],suffixes=('', '_')).drop(columns=['ID', 'Is Deleted', 'Name', 'Province Code', 'Region'])
-  agg_sales_channel = agg_sales_channel.merge(hub_info, how='left', left_on=['hub_id'], right_on=['ID'],suffixes=('', '_')).drop(columns=['ID', 'Is Deleted', 'Name', 'Province Code', 'Region'])
+  # agg_sales_channel = agg_sales_channel.merge(hub_info, how='left', left_on=['hub_id'], right_on=['ID'],suffixes=('', '_')).drop(columns=['ID', 'Is Deleted', 'Name', 'Province Code', 'Region'])
 
 
-  return agg_driver, agg_hub, agg_sales_channel
+  return agg_driver, agg_hub #, agg_sales_channel
   
 # Phase 6: Computing
 def compute_phase(x):
@@ -569,7 +574,7 @@ def read_pipeline(url_agg:str, str_time_from_:str, str_time_to_:str, split_from_
   # Phase 5: Exporting
   export_final_driver_file(final_driver)
   export_final_hub_file(final_hub)
-  export_final_sales_channel_file(sales_channel)
+  # export_final_sales_channel_file(sales_channel)
   reason =  export_final_reason_file(df.groupby(['first_attempt_date', 'reason']).apply(reason_fail_agg).reset_index())
   sales_channel_for_OPEX(df)
 
