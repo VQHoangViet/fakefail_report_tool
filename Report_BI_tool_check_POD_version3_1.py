@@ -426,7 +426,7 @@ def mapping_phase(x, url):
   # to csv by min max time of volume_of_ontime_KPI dataframe
   volume_of_ontime_KPI.to_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/final_data_monthly/volume_of_ontime_KPI/volume_of_ontime_KPI '+ \
                               str((pd.to_datetime(volume_of_ontime_KPI['dest_hub_date']).dt.year.min())) + "_" + str(pd.to_datetime(volume_of_ontime_KPI['dest_hub_date']).dt.month.min()) + \
-  + str((pd.to_datetime(volume_of_ontime_KPI['first_attempt_date']).dt.year.max())) + "_" + str(pd.to_datetime(volume_of_ontime_KPI['first_attempt_date']).dt.month.max()) +'.csv', index = False)
+  + str((pd.to_datetime(volume_of_ontime_KPI['dest_hub_date']).dt.year.max())) + "_" + str(pd.to_datetime(volume_of_ontime_KPI['dest_hub_date']).dt.month.max()) +'.csv', index = False)
 
   # group by driver_id apply bi_agg
   driver = x.groupby(['driver_id' ,'driver_name', 'driver_type','first_attempt_date', 'hub_id',  'hub_name',	'region']).apply(bi_agg).reset_index() ###
@@ -560,7 +560,7 @@ def read_pipeline(url_agg:str, str_time_from_:str, str_time_to_:str, split_from_
   print("Number of Uni Hub name: ", df['hub_name'].nunique())
   print("Shape: ", df.shape)
   print(df['fully_driver_result'].value_counts())
-  driver, hub, sales_channel = mapping_phase(df, url_agg)
+  driver, hub = mapping_phase(df, url_agg)
   
   
   # Phase 4: Aggregating
