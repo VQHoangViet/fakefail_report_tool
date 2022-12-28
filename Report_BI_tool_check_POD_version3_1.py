@@ -585,4 +585,4 @@ def read_pipeline(url_agg:str, str_time_from_:str, str_time_to_:str, split_from_
   reason =  export_final_reason_file(df.groupby(['first_attempt_date', 'reason']).apply(reason_fail_agg).reset_index())
   sales_channel_for_OPEX(df)
 
-  return df, reason, final_driver, final_hub, sales_channel
+  return df, reason, final_driver, final_hub
