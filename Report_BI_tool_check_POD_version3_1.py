@@ -198,7 +198,9 @@ def pre_processing(x):
     x['fully_driver_result'] = x['result']
   print('If fully_driver_result nan then fill it with result:...')
   x['fully_driver_result'] = x['fully_driver_result'].fillna(x['result'])
-  
+    # 3PLs fullly driver result = 'need_to_check'
+  print('3PLs fullly driver result = need_to_check:...')
+  x.loc[x['driver_type'] == '3PLs', 'fully_driver_result'] = 'need_to_check'
 
   
   # key shipper
