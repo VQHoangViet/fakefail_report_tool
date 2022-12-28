@@ -453,6 +453,13 @@ def mapping_phase(x, url):
   # agg_sales_channel = agg_sales_channel.merge(hub_info, how='left', left_on=['hub_id'], right_on=['ID'],suffixes=('', '_')).drop(columns=['ID', 'Is Deleted', 'Name', 'Province Code', 'Region'])
 
 
+
+  # GAP calculate volume_of_ontime_KPI and volume_of_ontime_KPI_Agg_hub
+  
+  gap = volume_of_ontime_KPI['Total orders reach LM hub'].sum() - agg_hub['Total orders reach LM hub'].sum()
+  print('GAP: ', gap)
+  
+
   return agg_driver, agg_hub #, agg_sales_channel
   
 # Phase 6: Computing
