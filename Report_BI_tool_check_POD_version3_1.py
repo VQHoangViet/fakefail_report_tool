@@ -297,13 +297,13 @@ def dispute_phase(x):
            (x['callee_'].isin(mobi_) | x['driver_contact_'].isin(mobi_))
         ), 'affected_by_mass_bug'] = 1
   x = x.drop(columns=['callee_', 'driver_contact_'])
-  # collecting tu form product:
-  creds, _ = default()
-  gc = gspread.authorize(creds)
-  print('https://docs.google.com/spreadsheets/d/1TLprj6Z9eerZzhph1nf24hyrBz_ApRYHlXZpmGSauww/edit?usp=sharing')
-  temp = gc.open_by_url('https://docs.google.com/spreadsheets/d/1TLprj6Z9eerZzhph1nf24hyrBz_ApRYHlXZpmGSauww/edit?usp=sharing').worksheet("Form Responses 1")
-  tid_product_form = get_as_dataframe(temp, evaluate_formulas=True).dropna(how='all', axis=1).dropna(how='all', axis=0).drop_duplicates(subset=['Mã đơn hàng (TID)']).rename(columns={"Mã đơn hàng (TID)": 'tracking_id' })[['tracking_id', 'PDT confirm']]
-  x.loc[(x['tracking_id'].isin(tid_product_form.loc[tid_product_form['PDT confirm'] =='accept','tracking_id'])) & (x['tracking_id'].isin(x.loc[x['affected_by_mass_bug'] == 0,'tracking_id'])),'affected_by_discreting_bug'] = 1
+  # # collecting tu form product:
+  # creds, _ = default()
+  # gc = gspread.authorize(creds)
+  # print('https://docs.google.com/spreadsheets/d/1TLprj6Z9eerZzhph1nf24hyrBz_ApRYHlXZpmGSauww/edit?usp=sharing')
+  # temp = gc.open_by_url('https://docs.google.com/spreadsheets/d/1TLprj6Z9eerZzhph1nf24hyrBz_ApRYHlXZpmGSauww/edit?usp=sharing').worksheet("Form Responses 1")
+  # tid_product_form = get_as_dataframe(temp, evaluate_formulas=True).dropna(how='all', axis=1).dropna(how='all', axis=0).drop_duplicates(subset=['Mã đơn hàng (TID)']).rename(columns={"Mã đơn hàng (TID)": 'tracking_id' })[['tracking_id', 'PDT confirm']]
+  # x.loc[(x['tracking_id'].isin(tid_product_form.loc[tid_product_form['PDT confirm'] =='accept','tracking_id'])) & (x['tracking_id'].isin(x.loc[x['affected_by_mass_bug'] == 0,'tracking_id'])),'affected_by_discreting_bug'] = 1
   
 
   # disputing:
@@ -319,7 +319,7 @@ def final_result(x):
     x.loc[(x['fully_driver_result'] == 'fake_fail') & (x['affected_by_discreting_bug'] == 0) & ((x['affected_by_mass_bug'] == 0) & (x['corrected_dispute'] == 0))   , 'final_result'] = 1
 
     # flag by POD
-    x.loc[(x['Final_Unqualified_POD_sample'] == 1) &  (x['corrected_dispute'] == 0)  & (x['affected_by_discreting_bug'] == 0) & (x['affected_by_mass_bug'] == 0) , 'final_POD_result'] = 1
+    x.loc[(x['Final_Unqualified_POD_sample'] == 1) &  (x['affected_by_discreting_bug'] == 0) & (x['corrected_dispute'] == 0)  & (x['affected_by_discreting_bug'] == 0) & (x['affected_by_mass_bug'] == 0) , 'final_POD_result'] = 1
     return x
 
 def spliting_file(x, split_from, split_to):
