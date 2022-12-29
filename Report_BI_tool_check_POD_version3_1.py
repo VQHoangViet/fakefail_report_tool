@@ -297,13 +297,15 @@ def dispute_phase(x):
            (x['callee_'].isin(mobi_) | x['driver_contact_'].isin(mobi_))
         ), 'affected_by_mass_bug'] = 1
   x = x.drop(columns=['callee_', 'driver_contact_'])
-  # collecting tu form product:
+  # collecting from form product:
   creds, _ = default()
   gc = gspread.authorize(creds)
   print('https://docs.google.com/spreadsheets/d/1TLprj6Z9eerZzhph1nf24hyrBz_ApRYHlXZpmGSauww/edit?usp=sharing')
   temp = gc.open_by_url('https://docs.google.com/spreadsheets/d/1TLprj6Z9eerZzhph1nf24hyrBz_ApRYHlXZpmGSauww/edit?usp=sharing').worksheet("Form Responses 1")
   tid_product_form = get_as_dataframe(temp, evaluate_formulas=True).dropna(how='all', axis=1).dropna(how='all', axis=0).drop_duplicates(subset=['Mã đơn hàng (TID)']).rename(columns={"Mã đơn hàng (TID)": 'tracking_id' })[['tracking_id', 'PDT confirm']]
   x.loc[(x['tracking_id'].isin(tid_product_form.loc[tid_product_form['PDT confirm'] =='accept','tracking_id'])) & (x['tracking_id'].isin(x.loc[x['affected_by_mass_bug'] == 0,'tracking_id'])),'affected_by_discreting_bug'] = 1
+  
+  # collecting từ from product switch by condition 
   
 
   # disputing:
@@ -414,18 +416,29 @@ def mapping_phase(x, url):
   # load hub_info
   hub_info = pd.read_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/Dataset/Hubs enriched - hub_info.csv')
   
+  
   # get volume_of_ontime_KPI
   # volume_of_ontime_KPI_for_sales_channel =  pd.read_csv(url)[['dest_hub_date', 'dest_hub_id', 'dest_hub_name', 'sales_channel', 'volume_of_ontime_KPI' ]]
   # volume_of_ontime_KPI_for_sales_channel['volume_of_ontime_KPI'] = volume_of_ontime_KPI_for_sales_channel['volume_of_ontime_KPI']/2
   # volume_of_ontime_KPI_for_sales_channel.rename(columns={"volume_of_ontime_KPI": 'Total orders reach LM hub' }, inplace=True)
 
 
+ 
+      
+
+
   volume_of_ontime_KPI = pd.read_csv(url)[['dest_hub_date', 'dest_hub_id', 'dest_hub_name', 'volume_of_ontime_KPI' ]]
   volume_of_ontime_KPI.rename(columns={"volume_of_ontime_KPI": 'Total orders reach LM hub' }, inplace=True)
+   # get min max first attempt date of x to slicing for volume_of_ontime_KPI 
+  min_date = pd.to_datetime(x['first_attempt_date']).dt.date.min()
+  max_date = pd.to_datetime(x['first_attempt_date']).dt.date.max()
+  
+  # slicing volume_of_ontime_KPI by min max date of x
+  volume_of_ontime_KPI = volume_of_ontime_KPI[(pd.to_datetime(volume_of_ontime_KPI['dest_hub_date']).dt.date >= min_date) & (pd.to_datetime(volume_of_ontime_KPI['dest_hub_date']).dt.date <= max_date)]
 
   # to csv by min max time of volume_of_ontime_KPI dataframe
   volume_of_ontime_KPI.to_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/final_data_monthly/volume_of_ontime_KPI/volume_of_ontime_KPI '+ \
-                              str((pd.to_datetime(volume_of_ontime_KPI['dest_hub_date']).dt.year.min())) + "_" + str(pd.to_datetime(volume_of_ontime_KPI['dest_hub_date']).dt.month.min()) + \
+                              str((pd.to_datetime(volume_of_ontime_KPI['dest_hub_date']).dt.year.min())) + "_" + str(pd.to_datetime(volume_of_ontime_KPI['dest_hub_date']).dt.month.min()) + " " +\
                                 str((pd.to_datetime(volume_of_ontime_KPI['dest_hub_date']).dt.year.max())) + "_" + str(pd.to_datetime(volume_of_ontime_KPI['dest_hub_date']).dt.month.max()) +'.csv', index = False)
 
   # group by driver_id apply bi_agg
