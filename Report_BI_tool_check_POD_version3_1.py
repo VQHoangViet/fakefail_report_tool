@@ -116,14 +116,14 @@ def read_folder_pod_resultQA_in_month(str_time_from, str_time_to):
   return big_frame
 
 def driver_finder(x):
-    if 'NEXT' in x.upper(): return 'fulltime'
-    elif 'FRLA' in x.upper(): return 'freelancer'
+    if 'NEXT' in x.upper(): return 'fulltime' 
     elif('AGAR' in x.upper()) | (
           '518-FRLA' in x.upper()) | (
             'XDOCT' in x.upper()) | (
               'XDOCK' in x.upper()) | (
                 '936-TSS' in x.upper()) | (
                   'GRAB' in x.upper()) : return '3PLs'
+    elif 'FRLA' in x.upper(): return 'freelancer'
     else: return 'others'
 
 def get_first_attempt_date(x):
