@@ -248,6 +248,8 @@ def read_POD_manual_check(x):
 
 def dispute_phase(x):
   print('Final dispute:...') 
+  
+
   ## Disputing
   x['disputing'] = 0
   x['attempt_datetime'] = pd.to_datetime(x['attempt_datetime'])
@@ -255,16 +257,15 @@ def dispute_phase(x):
   x['affected_by_mass_bug'] = 0
   x['affected_by_discreting_bug'] = 0
   
-  url = [
-    'https://docs.google.com/spreadsheets/d/1i1Rha9Qg1qZ9sGI0-ddX9QBlO6Jg9URy2tm62Fu3X20/edit#gid=1966091300',
-    'https://docs.google.com/spreadsheets/d/14J704NXH8hKJ4XWmmoGWEKozA66lJhui1HIaSVsAacw/edit#gid=1409944538',
-    'https://docs.google.com/spreadsheets/d/1tcc9oOKLX7u5iVksTXVaG421KEDSLDhrK2IB8BrS-4w/edit#gid=1518203630',
-    'https://docs.google.com/spreadsheets/d/1P0ohdLCGGvk037IHEFeiGvvc7l2bku5HIYCSgLT4i4o/edit#gid=419800374',
-    'https://docs.google.com/spreadsheets/d/1TG97G9-h5VwfnvLwTWPfK9myq41galjDvZmCcmPTE74/edit#gid=1171452712',
-    'https://docs.google.com/spreadsheets/d/1ZU_M3haDS-r2bQ-Y2II4rSOhtdkV96DMEK1ua4BopY8/edit#gid=0'
+  # read dispute backup
+  creds, _ = default()
+  gc = gspread.authorize(creds)
+  temp = gc.open_by_url('https://docs.google.com/spreadsheets/d/1dTSoo5Pdf4Xhzhjdca1TXi4MYTfQ8gJAnUV7OAPblHc/edit#gid=0').worksheet("Sheet1")
+  temp = get_as_dataframe(temp, evaluate_formulas=True)
+  # read link in file
+  url = temp['url'].dropna().unique()
 
-  ]
-
+  # read file
   disputing = pd.DataFrame()
   for j , i in enumerate(url):
     # holding temp data
@@ -274,6 +275,7 @@ def dispute_phase(x):
     printProgressBar(j + 1, len(url), prefix = 'Progress:', suffix = 'Complete link:' + i)
     # Convert to a DataFrame and render.
     disputing = pd.concat([disputing, get_as_dataframe(temp, evaluate_formulas=True)[['waypoint_id', 'Status']]])
+  
 
 
   disputing =  disputing.dropna(how='all', axis=1).dropna(how='all', axis=0).drop_duplicates(subset=['waypoint_id'])
