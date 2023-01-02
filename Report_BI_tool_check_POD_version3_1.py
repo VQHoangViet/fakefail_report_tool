@@ -414,7 +414,7 @@ def bi_agg(x):
     return pd.Series(names)
 
 # Phase 5: grouping by driver_id
-def mapping_phase(x, url):
+def mapping_phase(x):
   # load hub_info
   hub_info = pd.read_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/Dataset/Hubs enriched - hub_info.csv')
   
@@ -424,12 +424,13 @@ def mapping_phase(x, url):
   # volume_of_ontime_KPI_for_sales_channel['volume_of_ontime_KPI'] = volume_of_ontime_KPI_for_sales_channel['volume_of_ontime_KPI']/2
   # volume_of_ontime_KPI_for_sales_channel.rename(columns={"volume_of_ontime_KPI": 'Total orders reach LM hub' }, inplace=True)
 
+  backup_volume_of_ontime_KPI = pd.read_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/final_data_monthly/volume_of_ontime_KPI/BACKUP_volume_of_ontime_kpi.csv')[['dest_hub_date', 'dest_hub_id', 'dest_hub_name', 'volume_of_ontime_KPI' ]]
+  opex_ = pd.read_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/final_data_monthly/volume_of_ontime_KPI/Volume_reach_LM_hub 2022_12.csv')[['dest_hub_date', 'dest_hub_id', 'dest_hub_name', 'volume_of_ontime_KPI' ]]
+  volume_of_ontime_KPI = pd.concat([backup_volume_of_ontime_KPI, opex_]).drop_duplicates(subset=['dest_hub_date', 'dest_hub_id'], keep='last')
 
- 
-      
+  # save backup volume
+  backup_volume_of_ontime_KPI.to_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/final_data_monthly/volume_of_ontime_KPI/BACKUP_volume_of_ontime_kpi.csv', index=False)
 
-
-  volume_of_ontime_KPI = pd.read_csv(url)[['dest_hub_date', 'dest_hub_id', 'dest_hub_name', 'volume_of_ontime_KPI' ]]
   volume_of_ontime_KPI.rename(columns={"volume_of_ontime_KPI": 'Total orders reach LM hub' }, inplace=True)
    # get min max first attempt date of x to slicing for volume_of_ontime_KPI 
   min_date = pd.to_datetime(x['first_attempt_date']).dt.date.min()
@@ -470,7 +471,6 @@ def mapping_phase(x, url):
 
 
   # GAP calculate volume_of_ontime_KPI and volume_of_ontime_KPI_Agg_hub
-  
   gap = volume_of_ontime_KPI['Total orders reach LM hub'].sum() - agg_hub['Total orders reach LM hub'].sum()
   print('GAP: ', gap)
   
