@@ -427,7 +427,8 @@ def mapping_phase(x):
   backup_volume_of_ontime_KPI = pd.read_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/final_data_monthly/volume_of_ontime_KPI/BACKUP_volume_of_ontime_kpi.csv')[['dest_hub_date', 'dest_hub_id', 'dest_hub_name', 'volume_of_ontime_KPI' ]]
   opex_ = pd.read_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/final_data_monthly/volume_of_ontime_KPI/Volume_reach_LM_hub 2022_12.csv')[['dest_hub_date', 'dest_hub_id', 'dest_hub_name', 'volume_of_ontime_KPI' ]]
   volume_of_ontime_KPI = pd.concat([backup_volume_of_ontime_KPI, opex_]).drop_duplicates(subset=['dest_hub_date', 'dest_hub_id'], keep='last')
-
+  # print max date
+  print(volume_of_ontime_KPI.dest_hub_date.max())
   # save backup volume
   backup_volume_of_ontime_KPI.to_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/final_data_monthly/volume_of_ontime_KPI/BACKUP_volume_of_ontime_kpi.csv', index=False)
 
@@ -467,8 +468,6 @@ def mapping_phase(x):
   agg_driver = agg_driver.merge(hub_info, how='left', left_on=['hub_id'], right_on=['ID'],suffixes=('', '_')).drop(columns=['ID', 'Is Deleted', 'Name', 'Province Code', 'Region'])
   agg_hub = agg_hub.merge(hub_info, how='left', left_on=['hub_id'], right_on=['ID'],suffixes=('', '_')).drop(columns=['ID', 'Is Deleted', 'Name', 'Province Code', 'Region'])
   # agg_sales_channel = agg_sales_channel.merge(hub_info, how='left', left_on=['hub_id'], right_on=['ID'],suffixes=('', '_')).drop(columns=['ID', 'Is Deleted', 'Name', 'Province Code', 'Region'])
-
-
 
   # GAP calculate volume_of_ontime_KPI and volume_of_ontime_KPI_Agg_hub
   gap = volume_of_ontime_KPI['Total orders reach LM hub'].sum() - agg_hub['Total orders reach LM hub'].sum()
