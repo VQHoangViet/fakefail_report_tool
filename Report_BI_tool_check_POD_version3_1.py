@@ -544,7 +544,7 @@ def export_final_sales_channel_file(final):
 
 
 ### ___________________________________________________ Main ____________________________________________________________  
-def read_pipeline(url_agg:str, str_time_from_:str, str_time_to_:str, split_from_:str, split_to_:str):
+def read_pipeline(str_time_from_:str, str_time_to_:str, split_from_:str, split_to_:str):
   
 
 
