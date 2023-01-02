@@ -581,7 +581,7 @@ def read_pipeline(url_agg:str, str_time_from_:str, str_time_to_:str, split_from_
   print("Number of Uni Hub name: ", df['hub_name'].nunique())
   print("Shape: ", df.shape)
   print(df['fully_driver_result'].value_counts())
-  driver, hub = mapping_phase(df, url_agg)
+  driver, hub = mapping_phase(df)
   
   
   # Phase 4: Aggregating
