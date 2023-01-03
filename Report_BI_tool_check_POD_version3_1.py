@@ -433,9 +433,9 @@ def mapping_phase(x, url=''):
   # print max date
   print(volume_of_ontime_KPI.dest_hub_date.max())
   # save backup volume
-  backup_volume_of_ontime_KPI.to_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/final_data_monthly/volume_of_ontime_KPI/BACKUP_volume_of_ontime_kpi.csv', index=False)
+  volume_of_ontime_KPI.to_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/final_data_monthly/volume_of_ontime_KPI/BACKUP_volume_of_ontime_kpi.csv', index=False)
 
-  volume_of_ontime_KPI.rename(columns={"volume_of_ontime_KPI": 'Total orders reach LM hub' }, inplace=True)
+  volume_of_ontime_KPI.rename(columns={"volume_of_ontime_KPI": 'Total orders reach LM hub' }, inplace=True, errors='ignore')
    # get min max first attempt date of x to slicing for volume_of_ontime_KPI 
   min_date = pd.to_datetime(x['first_attempt_date']).dt.date.min()
   max_date = pd.to_datetime(x['first_attempt_date']).dt.date.max()
