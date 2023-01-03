@@ -392,7 +392,7 @@ def bi_agg(x):
         'total_fake_fail_attempt': x.loc[x['fully_driver_result'] == 'fake_fail','waypoint_id'].nunique(),
         'attempt_fake_fail_list': set(x[x['fully_driver_result']=='fake_fail']['waypoint_id']),
         'disputing_attempt':  x[(x['disputing']==1)]['waypoint_id'].nunique(),
-        'correted_by_disputing_attempt':  x[(x['corrected_dispute']==0) & (x['fully_driver_result']=='fake_fail')]['waypoint_id'].nunique(),
+        'correted_by_disputing_attempt':  x[(x['corrected_dispute']==1) & (x['fully_driver_result']=='fake_fail')]['waypoint_id'].nunique(),
         'total_attempt_affected_by_mass_bug': x[(x['affected_by_mass_bug']==1) & (x['fully_driver_result']=='fake_fail')]['waypoint_id'].nunique(),
         'total_attempt_affected_by_discreting_bug': x[(x['affected_by_discreting_bug']==1) & (x['fully_driver_result']=='fake_fail')]['waypoint_id'].nunique(),
         'total_POD_sample_attempt_flag': x[x['POD_sample_flag']==1]['waypoint_id'].nunique(),
