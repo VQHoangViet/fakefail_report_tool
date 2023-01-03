@@ -414,7 +414,7 @@ def bi_agg(x):
     return pd.Series(names)
 
 # Phase 5: grouping by driver_id
-def mapping_phase(x):
+def mapping_phase(x, url=''):
   # load hub_info
   hub_info = pd.read_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/Dataset/Hubs enriched - hub_info.csv')
   
@@ -425,7 +425,10 @@ def mapping_phase(x):
   # volume_of_ontime_KPI_for_sales_channel.rename(columns={"volume_of_ontime_KPI": 'Total orders reach LM hub' }, inplace=True)
 
   backup_volume_of_ontime_KPI = pd.read_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/final_data_monthly/volume_of_ontime_KPI/BACKUP_volume_of_ontime_kpi.csv')[['dest_hub_date', 'dest_hub_id', 'dest_hub_name', 'volume_of_ontime_KPI' ]]
-  opex_ = pd.read_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/final_data_monthly/volume_of_ontime_KPI/Volume_reach_LM_hub 2022_12.csv')[['dest_hub_date', 'dest_hub_id', 'dest_hub_name', 'volume_of_ontime_KPI' ]]
+  if url != '':
+    opex_ = pd.read_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/final_data_monthly/volume_of_ontime_KPI/Volume_reach_LM_hub 2022_12.csv')[['dest_hub_date', 'dest_hub_id', 'dest_hub_name', 'volume_of_ontime_KPI' ]]
+  else:
+    opex_ = pd.read_csv(url)[['dest_hub_date', 'dest_hub_id', 'dest_hub_name', 'volume_of_ontime_KPI' ]]
   volume_of_ontime_KPI = pd.concat([backup_volume_of_ontime_KPI, opex_]).drop_duplicates(subset=['dest_hub_date', 'dest_hub_id'], keep='last')
   # print max date
   print(volume_of_ontime_KPI.dest_hub_date.max())
@@ -544,11 +547,8 @@ def export_final_sales_channel_file(final):
 
 
 ### ___________________________________________________ Main ____________________________________________________________  
-def read_pipeline(str_time_from_:str, str_time_to_:str, split_from_:str, split_to_:str):
+def read_pipeline(str_time_from_:str, str_time_to_:str , split_from_:str, split_to_:str, url_agg =''):
   
-
-
-
   print('hello Ninja !!!' + str(pd.Timestamp.now()))
   print('''
 ██╗  ██╗ █████╗ ███████╗████████╗██╗  ██╗███████╗██████╗ 
@@ -581,7 +581,7 @@ def read_pipeline(str_time_from_:str, str_time_to_:str, split_from_:str, split_t
   print("Number of Uni Hub name: ", df['hub_name'].nunique())
   print("Shape: ", df.shape)
   print(df['fully_driver_result'].value_counts())
-  driver, hub = mapping_phase(df)
+  driver, hub = mapping_phase(df, url_agg)
   
   
   # Phase 4: Aggregating
