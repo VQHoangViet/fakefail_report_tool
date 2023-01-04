@@ -397,6 +397,7 @@ def bi_agg(x):
         'total_attempt_affected_by_discreting_bug': x[(x['affected_by_discreting_bug']==1) & (x['fully_driver_result']=='fake_fail')]['waypoint_id'].nunique(),
         'total_POD_sample_attempt_flag': x[x['POD_sample_flag']==1]['waypoint_id'].nunique(),
         'total_POD_sample_attempt_flag_fake_fail': x[(x['Final_Unqualified_POD_sample']==1)]['waypoint_id'].nunique(),
+        'real_FF_attempt': x[(x['final_result']==1)]['waypoint_id'].nunique(),
 
         ## tracking id
         'total_orders': x['order_id'].nunique(),
