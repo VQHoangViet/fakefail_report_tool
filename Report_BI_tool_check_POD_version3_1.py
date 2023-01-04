@@ -321,11 +321,11 @@ def dispute_phase(x):
   tid_product_form_2 = tid_product_form_2.loc[tid_product_form_2['PDT confirm'] == 'accept', :]
 
   # if tid_product_form_2['Mức độ ảnh hưởng'] == 'Single report' then flag affected_by_discreting_bug = 1 by tracking_id
-  tid_product_form_2_single = tid_product_form_2.loc[tid_product_form_2['Mức độ ảnh hưởng'] == 'Single report', 'Mã đơn hàng (TID)'].drop_duplicates()
+  tid_product_form_2_single = tid_product_form_2.loc[tid_product_form_2['Mức ảnh hưởng'] == 'Single report', 'Mã đơn hàng (TID)'].drop_duplicates()
   x.loc[(x['tracking_id'].isin(tid_product_form_2_single)) & (x['tracking_id'].isin(x.loc[x['affected_by_mass_bug'] == 0,'tracking_id'])),'affected_by_discreting_bug'] = 1
 
   # if tid_product_form_2['Mức độ ảnh hưởng'] == 'Route report' then flag affected_by_discreting_bug = 1 by route_id
-  tid_product_form_2_route = tid_product_form_2.loc[tid_product_form_2['Mức độ ảnh hưởng'] == 'Route report', 'Mã route (Route ID)'].drop_duplicates()
+  tid_product_form_2_route = tid_product_form_2.loc[tid_product_form_2['Mức ảnh hưởng'] == 'Route report', 'Mã route (Route ID)'].drop_duplicates()
   x.loc[(x['route_id'].isin(tid_product_form_2_route)) & (x['route_id'].isin(x.loc[x['affected_by_mass_bug'] == 0,'route_id'])),'affected_by_discreting_bug'] = 1
   
 
