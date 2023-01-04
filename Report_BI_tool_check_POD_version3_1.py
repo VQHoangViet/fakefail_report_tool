@@ -326,6 +326,8 @@ def dispute_phase(x):
 
   # if tid_product_form_2['Mức độ ảnh hưởng'] == 'Route report' then flag affected_by_discreting_bug = 1 by route_id
   tid_product_form_2_route = tid_product_form_2.loc[tid_product_form_2['Mức ảnh hưởng'] == 'Route report', 'Mã route (Route ID)'].drop_duplicates()
+  # split route_id by ';
+  tid_product_form_2_route = tid_product_form_2_route.str.split(';').explode().drop_duplicates().reset_index(drop=True)
   x.loc[(x['route_id'].isin(tid_product_form_2_route)) & (x['route_id'].isin(x.loc[x['affected_by_mass_bug'] == 0,'route_id'])),'affected_by_discreting_bug'] = 1
   
 
