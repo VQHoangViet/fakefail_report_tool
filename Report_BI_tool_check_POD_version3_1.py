@@ -300,14 +300,32 @@ def dispute_phase(x):
         ), 'affected_by_mass_bug'] = 1
   x = x.drop(columns=['callee_', 'driver_contact_'])
   # collecting from form product:
+
+  # form 1
   creds, _ = default()
   gc = gspread.authorize(creds)
   print('https://docs.google.com/spreadsheets/d/1TLprj6Z9eerZzhph1nf24hyrBz_ApRYHlXZpmGSauww/edit?usp=sharing')
   temp = gc.open_by_url('https://docs.google.com/spreadsheets/d/1TLprj6Z9eerZzhph1nf24hyrBz_ApRYHlXZpmGSauww/edit?usp=sharing').worksheet("Form Responses 1")
-  tid_product_form = get_as_dataframe(temp, evaluate_formulas=True).dropna(how='all', axis=1).dropna(how='all', axis=0).drop_duplicates(subset=['Mã đơn hàng (TID)']).rename(columns={"Mã đơn hàng (TID)": 'tracking_id' })[['tracking_id', 'PDT confirm']]
-  x.loc[(x['tracking_id'].isin(tid_product_form.loc[tid_product_form['PDT confirm'] =='accept','tracking_id'])) & (x['tracking_id'].isin(x.loc[x['affected_by_mass_bug'] == 0,'tracking_id'])),'affected_by_discreting_bug'] = 1
+  tid_product_form_1 = get_as_dataframe(temp, evaluate_formulas=True).dropna(how='all', axis=1).dropna(how='all', axis=0).drop_duplicates(subset=['Mã đơn hàng (TID)']).rename(columns={"Mã đơn hàng (TID)": 'tracking_id' })[['tracking_id', 'PDT confirm']]
+  x.loc[(x['tracking_id'].isin(tid_product_form_1.loc[tid_product_form_1['PDT confirm'] =='accept','tracking_id'])) & (x['tracking_id'].isin(x.loc[x['affected_by_mass_bug'] == 0,'tracking_id'])),'affected_by_discreting_bug'] = 1
   
-  # collecting từ from product switch by condition 
+  
+  # form 2
+  creds, _ = default()
+  gc = gspread.authorize(creds)
+  print('https://docs.google.com/spreadsheets/d/147uhr9cbfRB2R58Y_U5KOEQn5o-Xx-8HI6qwaV-dfxA/edit#gid=1465752559')
+  temp = gc.open_by_url('https://docs.google.com/spreadsheets/d/147uhr9cbfRB2R58Y_U5KOEQn5o-Xx-8HI6qwaV-dfxA/edit#gid=1465752559').worksheet("Form Responses 1")
+  tid_product_form_2 = get_as_dataframe(temp, evaluate_formulas=True).dropna(how='all', axis=1).dropna(how='all', axis=0)
+
+  # if tid_product_form_2['Mức độ ảnh hưởng'] == 'Single report' then flag affected_by_discreting_bug = 1 by tracking_id
+  tid_product_form_2_single = tid_product_form_2.loc[tid_product_form_2['Mức độ ảnh hưởng'] == 'Single report', 'Mã đơn hàng (TID)'].drop_duplicates()
+  x.loc[(x['tracking_id'].isin(tid_product_form_2_single)) & (x['tracking_id'].isin(x.loc[x['affected_by_mass_bug'] == 0,'tracking_id'])),'affected_by_discreting_bug'] = 1
+
+  # if tid_product_form_2['Mức độ ảnh hưởng'] == 'Route report' then flag affected_by_discreting_bug = 1 by route_id
+  tid_product_form_2_route = tid_product_form_2.loc[tid_product_form_2['Mức độ ảnh hưởng'] == 'Route report', 'Mã route (Route ID)'].drop_duplicates()
+  x.loc[(x['route_id'].isin(tid_product_form_2_route)) & (x['route_id'].isin(x.loc[x['affected_by_mass_bug'] == 0,'route_id'])),'affected_by_discreting_bug'] = 1
+  
+
   
 
   # disputing:
