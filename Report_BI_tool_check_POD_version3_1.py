@@ -295,16 +295,16 @@ def dispute_phase(x):
   x['callee_'] = x['callee'].str[:2]
   x['driver_contact_'] = x['driver_contact'].str[2:4]
 
-  x.loc[(  ( (x.attempt_datetime >= pd.Timestamp(2022, 10, 24, 6)) & (x.attempt_datetime <= pd.Timestamp(2022, 10, 24, 23, 59)) ) &
-           (x['callee_'].isin(mobi_) | x['driver_contact_'].isin(mobi_))
-        ), 'affected_by_mass_bug'] = 1
+  # x.loc[(  ( (x.attempt_datetime >= pd.Timestamp(2022, 10, 24, 6)) & (x.attempt_datetime <= pd.Timestamp(2022, 10, 24, 23, 59)) ) &
+  #          (x['callee_'].isin(mobi_) | x['driver_contact_'].isin(mobi_))
+  #       ), 'affected_by_mass_bug'] = 1
 
 
   # Lỗi sever: Các đầu số Mobi của khách hàng không thể gọi đc callee == *đầu số mobi* từ 15h 04/01/2023 đến hết 04/01/2023. cùng ngày
   x.loc[(  ( (x.attempt_datetime >= pd.Timestamp(2023, 1, 4, 15)) & (x.attempt_datetime <= pd.Timestamp(2023, 1, 4, 23, 59)) ) &
             (x['callee_'].isin(mobi_) | x['driver_contact_'].isin(mobi_))
         ), 'affected_by_mass_bug'] = 1
-        
+
   x = x.drop(columns=['callee_', 'driver_contact_'])
   # collecting from form product:
 
