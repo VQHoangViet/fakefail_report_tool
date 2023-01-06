@@ -382,7 +382,10 @@ def reason_fail_agg(x):
         'total_attempt': x['waypoint_id'].nunique(),
         'total_fake_fail_attempt': x[x['fully_driver_result']=='fake_fail']['waypoint_id'].nunique(),
         'real_ff_attempt': x[(x['fully_driver_result']=='fake_fail') & (x['corrected_dispute'] == 0) & (x['corrected_bug'] == 0)]['waypoint_id'].nunique(),
-      
+
+        # waypoint FF list
+        'waypoint_FF_list': x[x['fully_driver_result']=='fake_fail']['waypoint_id'].unique(),
+
         ## Updated on 27/09/2022 (starting time on data is 19/09/2022)
         'FF_attempt' : x[(x['fully_driver_result']=='fake_fail')]['waypoint_id'].nunique(),
         'Q_attempt' : x[(x['fully_driver_result']=='qualified')]['waypoint_id'].nunique(),
