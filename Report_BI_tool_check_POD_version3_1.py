@@ -291,13 +291,14 @@ def dispute_phase(x):
   
   # Lỗi sever: Các đầu số Mobi của khách hàng không thể gọi đc callee == *đầu số mobi* từ 6h00 24/10/2022 -> 23h59 cùng ngày
   mobi_ = ['90' , '93' , '89' ,  '70',	'79',	'77',	'76',	'78']
+  # mobifone number check by regex 
   x['attempt_datetime'] = pd.to_datetime(x['attempt_datetime'])
   x['callee_'] = x['callee'].str[:2]
   x['driver_contact_'] = x['driver_contact'].str[2:4]
 
-  # x.loc[(  ( (x.attempt_datetime >= pd.Timestamp(2022, 10, 24, 6)) & (x.attempt_datetime <= pd.Timestamp(2022, 10, 24, 23, 59)) ) &
-  #          (x['callee_'].isin(mobi_) | x['driver_contact_'].isin(mobi_))
-  #       ), 'affected_by_mass_bug'] = 1
+  x.loc[(  ( (x.attempt_datetime >= pd.Timestamp(2022, 10, 24, 6)) & (x.attempt_datetime <= pd.Timestamp(2022, 10, 24, 23, 59)) ) &
+           (x['callee_'].isin(mobi_) | x['driver_contact_'].isin(mobi_))
+        ), 'affected_by_mass_bug'] = 1
 
 
   # Lỗi sever: Các đầu số Mobi của khách hàng không thể gọi đc callee == *đầu số mobi* từ 15h 04/01/2023 đến hết 04/01/2023. cùng ngày
@@ -379,24 +380,27 @@ def sales_channel_for_OPEX(x):
 def reason_fail_agg(x):
     names = {
         'total_attempt': x['waypoint_id'].nunique(),
-        'BI_FakeFail': x[x['fully_driver_result']=='fake_fail']['waypoint_id'].nunique(),
-        'BI_FakeFail_order_count': x[x['fully_driver_result']=='fake_fail']['order_id'].nunique(),
-
+        'total_fake_fail_attempt': x[x['fully_driver_result']=='fake_fail']['waypoint_id'].nunique(),
+        'real_ff_attempt': x[(x['fully_driver_result']=='fake_fail') & (x['corrected_dispute'] == 0) & (x['corrected_bug'] == 0)]['waypoint_id'].nunique(),
+      
         ## Updated on 27/09/2022 (starting time on data is 19/09/2022)
-        'freelancer_FF_attempt' : x[(x['driver_type']=='freelancer') & (x['fully_driver_result']=='fake_fail')]['waypoint_id'].nunique(),
-        'fulltime_FF_attempt' : x[(x['driver_type']=='fulltime') & (x['fully_driver_result']=='fake_fail')]['waypoint_id'].nunique(),
-        '3PL_FF_attempt' : x[(x['driver_type']=='3PLs') & (x['fully_driver_result']=='fake_fail')]['waypoint_id'].nunique(),
-        'others_FF_attempt' : x[(x['driver_type']=='others') & (x['fully_driver_result']=='fake_fail')]['waypoint_id'].nunique(),
-        ##
-        'freelancer_FF_orders' : x[(x['driver_type']=='freelancer') & (x['fully_driver_result']=='fake_fail')]['order_id'].nunique(),
-        'fulltime_FF_orders' : x[(x['driver_type']=='fulltime') & (x['fully_driver_result']=='fake_fail')]['order_id'].nunique(),
-        '3PL_FF_orders' : x[(x['driver_type']=='3PLs') & (x['fully_driver_result']=='fake_fail')]['order_id'].nunique(),
-        'others_FF_orders' : x[(x['driver_type']=='others') & (x['fully_driver_result']=='fake_fail')]['order_id'].nunique(),
-        ##
+        'FF_attempt' : x[(x['fully_driver_result']=='fake_fail')]['waypoint_id'].nunique(),
+        'Q_attempt' : x[(x['fully_driver_result']=='qualified')]['waypoint_id'].nunique(),
+        'N_attempt' : x[(x['fully_driver_result']=='need_to_check')]['waypoint_id'].nunique(),
 
         # dispute case
         'dispute_case': x[x['disputing']==1]['waypoint_id'].nunique(),
-       
+        'dispute_case_corrected': x[x['corrected_dispute']==1]['waypoint_id'].nunique(),
+
+        # bug case
+        'mass_bug_case': x[x['affected_by_mass_bug']==1]['waypoint_id'].nunique(),
+        'discreting_bug_case': x[x['affected_by_discreting_bug']==1]['waypoint_id'].nunique(),
+        
+        # POD
+        'POD_sample': x[x['POD_sample_flag']==1]['waypoint_id'].nunique(),
+        'POD_case': x[x['Final_Unqualified_POD_sample']==1]['waypoint_id'].nunique(),
+        'POD_case_corrected': x[x['corrected_POD']==1]['waypoint_id'].nunique(),
+
         # final fully_driver_result
         'final_result': x[x['final_result']==1]['waypoint_id'].nunique(),
         
@@ -628,7 +632,7 @@ def read_pipeline(str_time_from_:str, str_time_to_:str , split_from_:str, split_
   export_final_driver_file(final_driver)
   export_final_hub_file(final_hub)
   # export_final_sales_channel_file(sales_channel)
-  reason =  export_final_reason_file(df.groupby(['first_attempt_date', 'reason']).apply(reason_fail_agg).reset_index())
+  reason =  export_final_reason_file(df.groupby(['first_attempt_date', 'reason', 'region', 'driver_type']).apply(reason_fail_agg).reset_index())
   sales_channel_for_OPEX(df)
 
   return df, reason, final_driver, final_hub
