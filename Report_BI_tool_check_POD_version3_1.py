@@ -381,7 +381,7 @@ def reason_fail_agg(x):
     names = {
         'total_attempt': x['waypoint_id'].nunique(),
         'total_fake_fail_attempt': x[x['fully_driver_result']=='fake_fail']['waypoint_id'].nunique(),
-        'real_ff_attempt': x[(x['fully_driver_result']=='fake_fail') & (x['corrected_dispute'] == 0) & (x['corrected_bug'] == 0)]['waypoint_id'].nunique(),
+        'real_FF_attempt': x[(x['final_result']==1)]['waypoint_id'].nunique(),
 
         # waypoint FF list
         'waypoint_FF_list': x[x['fully_driver_result']=='fake_fail']['waypoint_id'].unique(),
