@@ -401,8 +401,7 @@ def reason_fail_agg(x):
         
         # POD
         'POD_sample': x[x['POD_sample_flag']==1]['waypoint_id'].nunique(),
-        'POD_case': x[x['Final_Unqualified_POD_sample']==1]['waypoint_id'].nunique(),
-        'POD_case_corrected': x[x['corrected_POD']==1]['waypoint_id'].nunique(),
+        'POD_FF_sample': x[x['Final_Unqualified_POD_sample']==1]['waypoint_id'].nunique(),
 
         # final fully_driver_result
         'final_result': x[x['final_result']==1]['waypoint_id'].nunique(),
