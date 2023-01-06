@@ -385,7 +385,8 @@ def reason_fail_agg(x):
 
         # waypoint FF list
         'waypoint_FF_list': x[x['fully_driver_result']=='fake_fail']['waypoint_id'].unique(),
-
+        'waypoint_real_FF_list' : x[x['final_result']==1]['waypoint_id'].unique(),
+        
         ## Updated on 27/09/2022 (starting time on data is 19/09/2022)
         'FF_attempt' : x[(x['fully_driver_result']=='fake_fail')]['waypoint_id'].nunique(),
         'Q_attempt' : x[(x['fully_driver_result']=='qualified')]['waypoint_id'].nunique(),
@@ -550,7 +551,7 @@ def export_final_hub_file(final):
   
   # dashboard final data
   try:
-    final.drop(columns=['attempt_fake_fail_list', 'Final_Fake_fail_tracking_id_list']).to_csv('/content/DB_final_hub_data '+ str((pd.to_datetime(final['first_attempt_date']).dt.year.max())) + "_" + str(pd.to_datetime(final['first_attempt_date']).dt.month.max()) +'.csv', index = False)
+    final.drop(columns=['attempt_fake_fail_list']).to_csv('/content/DB_final_hub_data '+ str((pd.to_datetime(final['first_attempt_date']).dt.year.max())) + "_" + str(pd.to_datetime(final['first_attempt_date']).dt.month.max()) +'.csv', index = False)
   except:
     final.to_csv('/content/DB_final_hub_data '+ str((pd.to_datetime(final['first_attempt_date']).dt.year.max())) + "_" + str(pd.to_datetime(final['first_attempt_date']).dt.month.max()) +'.csv', index = False)
 
@@ -563,7 +564,7 @@ def export_final_reason_file(x):
   
   # dashboard final data
   try:
-    final.drop(columns=['attempt_fake_fail_list', 'Final_Fake_fail_tracking_id_list']).to_csv('/content/DB_final_reason_data '+ str((pd.to_datetime(final['first_attempt_date']).dt.year.max())) + "_" + str(pd.to_datetime(final['first_attempt_date']).dt.month.max()) +'.csv', index = False)
+    final.drop(columns=['attempt_FF_list', 'attempt_real_FF_list']).to_csv('/content/DB_final_reason_data '+ str((pd.to_datetime(final['first_attempt_date']).dt.year.max())) + "_" + str(pd.to_datetime(final['first_attempt_date']).dt.month.max()) +'.csv', index = False)
   except:
     pass
 
