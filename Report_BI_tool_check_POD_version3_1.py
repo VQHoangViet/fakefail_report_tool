@@ -581,7 +581,10 @@ def export_final_sales_channel_file(final):
   except:
     final.to_csv('/content/DB_final_sales_channel_data '+ str((pd.to_datetime(final['first_attempt_date']).dt.year.max())) + "_" + str(pd.to_datetime(final['first_attempt_date']).dt.month.max()) +'.csv', index = False)
 
+# create a google sheet with final hub data
+def create_google_sheet(final, sheet_name):
 
+  
 
 
 
@@ -635,7 +638,7 @@ def read_pipeline(str_time_from_:str, str_time_to_:str , split_from_:str, split_
   export_final_driver_file(final_driver)
   export_final_hub_file(final_hub)
   # export_final_sales_channel_file(sales_channel)
-  reason =  export_final_reason_file(df.groupby(['first_attempt_date', 'reason', 'region', 'driver_type']).apply(reason_fail_agg).reset_index())
+  reason =  export_final_reason_file(df.groupby(['attempt_date', 'reason', 'region', 'driver_type']).apply(reason_fail_agg).reset_index())
   sales_channel_for_OPEX(df)
 
   return df, reason, final_driver, final_hub
