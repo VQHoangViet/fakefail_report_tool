@@ -531,9 +531,9 @@ def compute_phase(x):
 # get max attempt date
 def get_attempt_date(x, col_name, max=True):
   if max:
-    return x[col_name].max().to_period('M')
+    return x[col_name].max().strftime('%Y-%M')
   if max==False:
-    return x[col_name].min().to_period('M')
+    return x[col_name].min().strftime('%Y-%M')
 
 
 # Final: exporting
