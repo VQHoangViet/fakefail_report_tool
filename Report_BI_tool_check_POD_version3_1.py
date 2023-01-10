@@ -379,34 +379,30 @@ def sales_channel_for_OPEX(x):
 # Phase 3: grouping
 def reason_fail_agg(x):
     names = {
-        'total_attempt': x['waypoint_id'].nunique(),
-        'total_fake_fail_attempt': x[x['fully_driver_result']=='fake_fail']['waypoint_id'].nunique(),
-        'real_FF_attempt': x[(x['final_result']==1)]['waypoint_id'].nunique(),
+    'total_attempt': x['waypoint_id'].nunique(),
+    'dispute_case': x[x['disputing']==1]['waypoint_id'].nunique(),
+    'dispute_case_corrected': x[x['corrected_dispute']==1]['waypoint_id'].nunique(),
 
-        # waypoint FF list
-        'waypoint_FF_list': x[x['fully_driver_result']=='fake_fail']['waypoint_id'].unique(),
-        'waypoint_real_FF_list' : x[x['final_result']==1]['waypoint_id'].unique(),
-        
-        ## Updated on 27/09/2022 (starting time on data is 19/09/2022)
-        'FF_attempt' : x[(x['fully_driver_result']=='fake_fail')]['waypoint_id'].nunique(),
-        'Q_attempt' : x[(x['fully_driver_result']=='qualified')]['waypoint_id'].nunique(),
-        'N_attempt' : x[(x['fully_driver_result']=='need_to_check')]['waypoint_id'].nunique(),
+    # bug case
+    'mass_bug_case': x[x['affected_by_mass_bug']==1]['waypoint_id'].nunique(),
+    'discreting_bug_case': x[x['affected_by_discreting_bug']==1]['waypoint_id'].nunique(),
+    
+    # POD
+    'POD_sample': x[x['POD_sample_flag']==1]['waypoint_id'].nunique(),
+    'POD_FF_sample': x[x['Final_Unqualified_POD_sample']==1]['waypoint_id'].nunique(),
 
-        # dispute case
-        'dispute_case': x[x['disputing']==1]['waypoint_id'].nunique(),
-        'dispute_case_corrected': x[x['corrected_dispute']==1]['waypoint_id'].nunique(),
+    # pod collection:
+    'Fail attempt sau 10PM': x[(x['Fail attempt sau 10PM']==1)]['waypoint_id'].nunique(),
+    'Lịch sử tối thiểu 3 cuộc gọi ra': x[x['Lịch sử tối thiểu 3 cuộc gọi ra']==1]['waypoint_id'].nunique(),
+    'Tối thiểu 3 cuộc gọi với thời gian đổ chuông >10s trong trường hợp khách không nghe máy': x[x['Tối thiểu 3 cuộc gọi với thời gian đổ chuông >10s trong trường hợp khách không nghe máy']==1]['waypoint_id'].nunique(),
+    'Thời gian giữa mỗi cuộc gọi tối thiểu 1p': x[x['Thời gian giữa mỗi cuộc gọi tối thiểu 1p']==1]['waypoint_id'].nunique(),
+    'Thời gian gọi sớm hơn hoặc bằng thời gian xử lý thất bại': x[x['Thời gian gọi sớm hơn hoặc bằng thời gian xử lý thất bại']==1]['waypoint_id'].nunique(),
+    'Không có cuộc gọi tiêu chuẩn': x[(x['Không có cuộc gọi tiêu chuẩn']==1)]['waypoint_id'].nunique(), 
+    'Không có cuộc gọi thành công': x[x['Không có cuộc gọi thành công']==1]['waypoint_id'].nunique(),
+    'Không có hình ảnh POD': x[x['Không có hình ảnh POD']==1]['waypoint_id'].nunique(),
 
-        # bug case
-        'mass_bug_case': x[x['affected_by_mass_bug']==1]['waypoint_id'].nunique(),
-        'discreting_bug_case': x[x['affected_by_discreting_bug']==1]['waypoint_id'].nunique(),
-        
-        # POD
-        'POD_sample': x[x['POD_sample_flag']==1]['waypoint_id'].nunique(),
-        'POD_FF_sample': x[x['Final_Unqualified_POD_sample']==1]['waypoint_id'].nunique(),
-
-        # final fully_driver_result
-        'final_result': x[x['final_result']==1]['waypoint_id'].nunique(),
-        
+    # final fully_driver_result
+    'final_result': x[x['final_result']==1]['waypoint_id'].nunique()
     }
     return pd.Series(names)
 
@@ -569,14 +565,14 @@ def export_final_hub_file(final):
 
 def export_final_reason_file(x):
   # final reason data
-  final = x.sort_values('first_attempt_date')
+  final = x.sort_values('attempt_date')
 
   # export final hub data
-  final.to_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/final_data_monthly/final_reason/final_reason_data '+ get_attempt_date(final, 'first_attempt_date') +'.csv', index = False)
+  final.to_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/final_data_monthly/final_reason/final_reason_data '+ get_attempt_date(final, 'attempt_date') +'.csv', index = False)
   
   # dashboard final data
   try:
-    final.drop(columns=['attempt_FF_list', 'attempt_real_FF_list']).to_csv('/content/DB_final_reason_data '+ get_attempt_date(final, 'first_attempt_date') +'.csv', index = False)
+    final.drop(columns=['attempt_FF_list', 'attempt_real_FF_list']).to_csv('/content/DB_final_reason_data '+ get_attempt_date(final, 'attempt_date') +'.csv', index = False)
   except:
     pass
 
@@ -650,7 +646,7 @@ def read_pipeline(str_time_from_:str, str_time_to_:str , split_from_:str, split_
   export_final_driver_file(final_driver)
   export_final_hub_file(final_hub)
   # export_final_sales_channel_file(sales_channel)
-  reason =  export_final_reason_file(df.groupby(['attempt_date', 'reason', 'region', 'driver_type']).apply(reason_fail_agg).reset_index())
+  reason =  export_final_reason_file(df.groupby(['attempt_date', 'region', 'hub_name', 'driver_type', 'fully_driver_result', 'reason']).apply(reason_fail_agg).reset_index())
   sales_channel_for_OPEX(df)
 
   return df, reason, final_driver, final_hub
