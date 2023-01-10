@@ -521,9 +521,14 @@ def mapping_phase(x, url=''):
 def compute_phase(x):
   import math
   raw_data = x.copy()
-  max_total_order = raw_data.groupby(['hub_id', 'first_attempt_date'])[['Total orders reach LM hub']].transform(lambda x: x.max())
-  raw_data['original_FF_index'] = (raw_data['total_fake_fail_orders']/max_total_order['Total orders reach LM hub']).fillna(0)
-  raw_data['actual_fakefail_index'] = (raw_data['real_FF_orders']/raw_data['Total orders reach LM hub']).fillna(0)
+  try:
+    max_total_order = raw_data.groupby(['hub_id', 'first_attempt_date'])[['Total orders reach LM hub']].transform(lambda x: x.max())
+    raw_data['original_FF_index'] = (raw_data['total_fake_fail_orders']/max_total_order['Total orders reach LM hub']).fillna(0)
+    raw_data['actual_fakefail_index'] = (raw_data['real_FF_orders']/raw_data['Total orders reach LM hub']).fillna(0)
+  except:
+    max_total_order = raw_data.groupby(['hub_id', 'attempt_date'])[['Total orders reach LM hub']].transform(lambda x: x.max())
+    raw_data['original_FF_index'] = (raw_data['total_fake_fail_orders']/max_total_order['Total orders reach LM hub']).fillna(0)
+    raw_data['actual_fakefail_index'] = (raw_data['real_FF_orders']/raw_data['Total orders reach LM hub']).fillna(0)
   
   return raw_data
 
