@@ -527,44 +527,51 @@ def compute_phase(x):
   
   return raw_data
 
+# get max attempt date
+def get_attempt_date(x, col_name, max=True):
+  if max:
+    return x[col_name].max().dt.to_period('M')
+  if max==False:
+    return x[col_name].min().dt.to_period('M')
+
 
 # Final: exporting
 def export_final_driver_file(final):
   # final driver data
-  final = final.sort_values('first_attempt_date')
+  final = final.sort_values('attempt_date')
 
   # export final driver data
-  final.to_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/final_data_monthly/final_driver/final_driver_data '+ str((pd.to_datetime(final['first_attempt_date']).dt.year.max())) + "_" + str(pd.to_datetime(final['first_attempt_date']).dt.month.max()) +'.csv', index = False)
+  final.to_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/final_data_monthly/final_driver/final_driver_data ' + get_attempt_date(final, 'attempt_date') +'.csv', index = False)
   
   # dashboard final data
   try:
-    final.drop(columns=['attempt_fake_fail_list', 'Final_Fake_fail_tracking_id_list']).to_csv('/content/DB_final_driver_data '+ str((pd.to_datetime(final['first_attempt_date']).dt.year.max())) + "_" + str(pd.to_datetime(final['first_attempt_date']).dt.month.max()) +'.csv', index = False)
+    final.drop(columns=['attempt_fake_fail_list', 'Final_Fake_fail_tracking_id_list']).to_csv('/content/DB_final_driver_data '+ get_attempt_date(final, 'attempt_date') +'.csv', index = False)
   except:
-    final.to_csv('/content/DB_final_driver_data '+ str((pd.to_datetime(final['first_attempt_date']).dt.year.max())) + "_" + str(pd.to_datetime(final['first_attempt_date']).dt.month.max()) +'.csv', index = False)
+    final.to_csv('/content/DB_final_driver_data '+ get_attempt_date(final, 'attempt_date') +'.csv', index = False)
 
 def export_final_hub_file(final):
   # final hub data
   final = final.sort_values('first_attempt_date')
 
   # export final hub data
-  final.to_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/final_data_monthly/final_hub/final_hub_data '+ str((pd.to_datetime(final['first_attempt_date']).dt.year.max())) + "_" + str(pd.to_datetime(final['first_attempt_date']).dt.month.max()) +'.csv', index = False)
+  final.to_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/final_data_monthly/final_hub/final_hub_data '+ get_attempt_date(final, 'first_attempt_date') +'.csv', index = False)
   
   # dashboard final data
   try:
-    final.drop(columns=['attempt_fake_fail_list', 'Final_Fake_fail_tracking_id_list']).to_csv('/content/DB_final_hub_data '+ str((pd.to_datetime(final['first_attempt_date']).dt.year.max())) + "_" + str(pd.to_datetime(final['first_attempt_date']).dt.month.max()) +'.csv', index = False)
+    final.drop(columns=['attempt_fake_fail_list', 'Final_Fake_fail_tracking_id_list']).to_csv('/content/DB_final_hub_data '+ get_attempt_date(final, 'first_attempt_date') +'.csv', index = False)
   except:
-    final.to_csv('/content/DB_final_hub_data '+ str((pd.to_datetime(final['first_attempt_date']).dt.year.max())) + "_" + str(pd.to_datetime(final['first_attempt_date']).dt.month.max()) +'.csv', index = False)
+    final.to_csv('/content/DB_final_hub_data '+ get_attempt_date(final, 'first_attempt_date') +'.csv', index = False)
 
 def export_final_reason_file(x):
   # final reason data
   final = x.sort_values('first_attempt_date')
 
   # export final hub data
-  final.to_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/final_data_monthly/final_reason/final_reason_data '+ str((pd.to_datetime(final['first_attempt_date']).dt.year.max())) + "_" + str(pd.to_datetime( final['first_attempt_date']).dt.month.max()) +'.csv', index = False)
+  final.to_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/final_data_monthly/final_reason/final_reason_data '+ get_attempt_date(final, 'first_attempt_date') +'.csv', index = False)
   
   # dashboard final data
   try:
-    final.drop(columns=['attempt_FF_list', 'attempt_real_FF_list']).to_csv('/content/DB_final_reason_data '+ str((pd.to_datetime(final['first_attempt_date']).dt.year.max())) + "_" + str(pd.to_datetime(final['first_attempt_date']).dt.month.max()) +'.csv', index = False)
+    final.drop(columns=['attempt_FF_list', 'attempt_real_FF_list']).to_csv('/content/DB_final_reason_data '+ get_attempt_date(final, 'first_attempt_date') +'.csv', index = False)
   except:
     pass
 
@@ -573,13 +580,13 @@ def export_final_sales_channel_file(final):
   final = final.sort_values('first_attempt_date')
 
   # export final sales channel data
-  final.to_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/final_data_monthly/final_sales_channel/final_sales_channel_data '+ str((pd.to_datetime(final['first_attempt_date']).dt.year.max())) + "_" + str(pd.to_datetime(final['first_attempt_date']).dt.month.max()) +'.csv', index = False)
+  final.to_csv('/content/drive/MyDrive/VN-QA/29. QA - Data Analyst/FakeFail/final_data_monthly/final_sales_channel/final_sales_channel_data ' +get_attempt_date(final, 'first_attempt_date') +'.csv', index = False)
   
   # dashboard final data
   try:
-    final.drop(columns=['attempt_fake_fail_list', 'Final_Fake_fail_tracking_id_list']).to_csv('/content/DB_final_sales_channel_data '+ str((pd.to_datetime(final['first_attempt_date']).dt.year.max())) + "_" + str(pd.to_datetime(final['first_attempt_date']).dt.month.max()) +'.csv', index = False)
+    final.drop(columns=['attempt_fake_fail_list', 'Final_Fake_fail_tracking_id_list']).to_csv('/content/DB_final_sales_channel_data '+ get_attempt_date(final, 'first_attempt_date') +'.csv', index = False)
   except:
-    final.to_csv('/content/DB_final_sales_channel_data '+ str((pd.to_datetime(final['first_attempt_date']).dt.year.max())) + "_" + str(pd.to_datetime(final['first_attempt_date']).dt.month.max()) +'.csv', index = False)
+    final.to_csv('/content/DB_final_sales_channel_data '+ get_attempt_date(final, 'first_attempt_date') +'.csv', index = False)
 
 # create a google sheet with final hub data
 def create_google_sheet(final, sheet_name):
