@@ -487,7 +487,7 @@ def mapping_phase(x, url=''):
                                 str((pd.to_datetime(volume_of_ontime_KPI['dest_hub_date']).dt.year.max())) + "_" + str(pd.to_datetime(volume_of_ontime_KPI['dest_hub_date']).dt.month.max()) +'.csv', index = False)
 
   # group by driver_id apply bi_agg
-  driver = x.groupby(['driver_id' ,'driver_name', 'driver_type','first_attempt_date', 'hub_id',  'hub_name',	'region']).apply(bi_agg).reset_index() ###
+  driver = x.groupby(['driver_id' ,'driver_name', 'driver_type','attempt_date', 'hub_id',  'hub_name',	'region']).apply(bi_agg).reset_index() ###
 
   # group by hub_id apply bi_agg
   hub = x.groupby(['first_attempt_date' ,'hub_id', 'hub_name', 'region']).apply(bi_agg).reset_index()
@@ -496,7 +496,7 @@ def mapping_phase(x, url=''):
   # sales_channel = x.groupby(['first_attempt_date' ,'hub_id', 'hub_name','sales_channel']).apply(bi_agg).reset_index()
  
   # merge with volume_of_ontime_KPI
-  agg_driver = driver.merge(volume_of_ontime_KPI, how='left', left_on=['first_attempt_date','hub_id'], right_on=['dest_hub_date','dest_hub_id'],suffixes=('', '_y'))
+  agg_driver = driver.merge(volume_of_ontime_KPI, how='left', left_on=['attempt_date','hub_id'], right_on=['dest_hub_date','dest_hub_id'],suffixes=('', '_y'))
   agg_hub = hub.merge(volume_of_ontime_KPI, how='left', left_on=['first_attempt_date','hub_id'], right_on=['dest_hub_date','dest_hub_id'],suffixes=('', '_y'))
   # agg_sales_channel = sales_channel.merge(volume_of_ontime_KPI_for_sales_channel, how='left', left_on=['first_attempt_date','hub_id', 'sales_channel'], right_on=['dest_hub_date','dest_hub_id', 'sales_channel'],suffixes=('', '_y'))
 
