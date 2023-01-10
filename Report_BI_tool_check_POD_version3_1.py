@@ -532,9 +532,9 @@ def compute_phase(x):
 def get_attempt_date(x, col_name, max=True):
   x[col_name] = pd.to_datetime(x[col_name])
   if max:
-    return str(x[col_name].dt.max).strftime('%Y_%M')
+    return str(x[col_name].max()).strftime('%Y_%M')
   if max==False:
-    return str(x[col_name].dt.min).strftime('%Y_%M')
+    return str(x[col_name].min()).strftime('%Y_%M')
 
 
 # Final: exporting
